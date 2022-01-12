@@ -54,9 +54,9 @@
             ;if elt is bad
             ( (not (integer? elt)) #f)
             ;if left-bst is bad (not of length 3 and 0 or not a list)
-            ( (or (and (not (= (length left-bst) 0)) (not (= (length left-bst) 3))) (not (list? left-bst))) #f)
+            ( (or (not (list? left-bst)) (and (not (= (length left-bst) 0)) (not (= (length left-bst) 3))) (not (list? left-bst))) #f)
             ;if right-bst is bad
-            ( (or (and (not (= (length right-bst) 0)) (not (= (length right-bst) 3))) (not (list? right-bst))) #f)   
+            ( (or (not (list? right-bst)) (and (not (= (length right-bst) 0)) (not (= (length right-bst) 3))) (not (list? right-bst))) #f)   
             (else  (list elt left-bst right-bst)))))
 
 ;pre-order
