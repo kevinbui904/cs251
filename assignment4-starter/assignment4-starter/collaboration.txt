@@ -1,0 +1,1 @@
+I did not collaborate with anybody on this assignment nor did I use any external resources. All codes written in main.scm aside from the given "gen-lazy-list" is written by me (Thien K. M. Bui)
