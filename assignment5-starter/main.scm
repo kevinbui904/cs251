@@ -66,5 +66,23 @@
             (cond 
                 ((null? filter) #t)
                 ((equal? (car filter) compare_to) #f)
-                (else ((union-filter (cdr filter)) compare_to))
-            ))))
+                (else ((union-filter (cdr filter)) compare_to))))))
+
+;intersect
+;param: lst1 and lst2
+;return: list with only duplicate members of lst1 and lst2 
+(define intersect 
+    (lambda (lst1 lst2)
+    ;run the filter twice to catch the no-duplicate case
+        (my-filter (intersect-filter lst2) (my-filter (intersect-filter lst1) lst2))))
+
+;intersect-filter
+;param: filter(list) containing non-duplicated members and another list (second list is curried)
+;return: filter function that return true if list2 contains a duplicate member from list1
+(define intersect-filter 
+    (lambda (filter)
+        (lambda (compare_to)
+            (cond 
+                ((null? filter) #f)
+                ((equal? (car filter) compare_to) #t)
+                (else ((intersect-filter (cdr filter)) compare_to))))))
