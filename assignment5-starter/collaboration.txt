@@ -1,0 +1,1 @@
+All codes written in main.scm is written by either Thien K. M. Bui or Victor Huang. That being said, we did have to look up how the "apply" method worked via stackoverflow (https://stackoverflow.com/questions/27488723/what-is-the-difference-between-map-and-apply-in-scheme). 

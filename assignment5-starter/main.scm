@@ -1,6 +1,6 @@
-; Written by Thien K. M. Bui
+; Written by Thien K. M. Bui and Victor Huang
 ; Assignment 5, Carleton College CS251 Winter '22
-; Last editted 1/17/21
+; Last editted 01/18/21
 
 ;curry3
 ;param: 1 parameter, my_function 
