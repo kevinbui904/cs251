@@ -40,7 +40,7 @@
 
 ;my-filter
 ;param: filter function and a list for the filter to apply to
-;return: list containing filtered members
+;return: list containing filtered members (filter_function should return true if the element is to added to the list, false otherwise)
 (define my-filter 
     (lambda (filter_function lst)
         (cond 
@@ -86,3 +86,14 @@
                 ((null? filter) #f)
                 ((equal? (car filter) compare_to) #t)
                 (else ((intersect-filter (cdr filter)) compare_to))))))
+
+;exists
+;param: function (predicate) and a list of items to apply the predicate to
+;return: t if any items in lst satisfy the predicate, f otherwise
+(define exists 
+    (lambda (predicate lst)
+        ;if there is an element in the returned list after filter is ran, then at least 1 element must have satisfied the predicate
+        (if (> (length (my-filter predicate lst)) 0)
+            #t 
+            #f
+            )))
