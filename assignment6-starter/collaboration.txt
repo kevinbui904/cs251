@@ -1,1 +1,1 @@
-https://stackoverflow.com/questions/60801831/how-modulo-and-remainder-should-work-in-scheme
+ALl code in main.scm is written by me, Thien K. M. Bui aside from the modulo function whcih I had to look up https://stackoverflow.com/questions/60801831/how-modulo-and-remainder-should-work-in-scheme

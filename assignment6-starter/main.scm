@@ -1,6 +1,6 @@
 ;Written by Thien K. M. Bui
 ;Programming Languages Carleton College Winter '22
-;Last updated 01/19/22
+;Last updated 01/20/22
 
 ;seq
 ;param: two integers (first last)
@@ -58,19 +58,32 @@
 
 (define filter-multiples
     (lambda (lazy n)
-       (filter-multiples-helper lazy n '())
-       ))
+       (cond 
+        ((not lazy) #f)
+        ((= (modulo (car lazy) n) 0) (filter-multiples ((cdr lazy)) n))
+        (else (cons (car lazy) (lambda () (filter-multiples ((cdr lazy)) n)))))))
 
-;  (if (or (not lazy) (= (modulo (car lazy) n) 0))
-;         (cons '() (filter-multiples ((cdr lazy)) n))
-;         (cons (car lazy) (filter-multiples ((cdr lazy)) n)))
-;filter-multiples-helper (for tail optimization)
-;param: lazy-list lazy, integer n, return-lazy-list return_lazy
-;return: lazy-list of all integers in lazy not-divisible by n
-(define filter-multiples-helper
-    (lambda (lazy n return_lazy)
-        (cond 
-            ((not lazy) '())
-            ((= (modulo (car lazy) n) 0)  (filter-multiples-helper ((cdr lazy)) n  (append '() return_lazy)))
-            (else (filter-multiples-helper ((cdr lazy)) n  (append return_lazy (car lazy))))
-        )))
+;almost-eratosthenes
+;param: lazy-list lazy
+;return: lazy list containing the first element of lazy-list and all other elements in list that are not divisible by the first element
+(define almost-eratosthenes
+    (lambda (lazy)
+        (filter-multiples lazy (car lazy))))
+
+;eratosthenes 
+;param: lazy-list
+;return: lazy-list containing all prime numbers (Sieve of Eratosthenes)
+(define eratosthenes 
+    (lambda (lazy)
+        (if (null? lazy) 
+        #f
+        (cons (car lazy) 
+            (lambda ()
+                (eratosthenes (filter-multiples lazy (car lazy))))))))
+
+;prime
+;param: none
+;return: lazy-list of all prime numbers
+(define primes
+    (lambda ()
+        (eratosthenes (inf-seq 2))))
