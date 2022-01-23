@@ -1,0 +1,1 @@
+I solemnly swear that I did not confer with any other human beings (I think James Ryan is included here too??) in preparing this submission. All code written in this folder, with the exception of tester-script.scm which has been copy/pasted from previous assignments, are written by Thien K. M. Bui

@@ -32,7 +32,7 @@
 (test-assert "index5" (not (index '() 1)))
 (test-assert "index6" (not (index '((1 2) (3 4)) 4)))
 
-(test-equal "index7" 1 (index '((a b) (3 4)) '(a b)))
+(test-equal "index7" 0 (index '((a b) (3 4)) '(a b)))
 (test-equal "index8" 1 (index '(1 c 3 4 5) 'c))
 
 
@@ -48,32 +48,35 @@
 (test-equal "indices-lazy2" 2 (car ((cdr (indices-lazy (make-lazy '(1 2 1 2 3)) 1)))))
 (test-assert "indicies-lazy3-none" (not  (indices-lazy (make-lazy '(1 2 1 2 3)) 44)))
 
-(test-equal "indices-lazy2" 'a (car ((cdr (indices-lazy (make-lazy '(1 2 a 2 3)) 'a)))))
+(test-equal "indices-lazy4" 2 (car(indices-lazy (make-lazy '(1 2 a 2 3)) 'a)))
 
 ;reverse-lazy-list
 (test-equal "reverse-lazy-list1" '(5 4 3 2 1) (reverse-lazy-list (make-lazy '(1 2 3 4 5))))
+(test-assert "reverse-lazy-list2" (not (reverse-lazy-list (make-lazy '()))))
+(test-equal "reverse-lazy-list3" '(1) (reverse-lazy-list (make-lazy '(1))))
 
 ;curry5-reverse-list
-(test-equal "curry5-reverse-list1" '(5 4 3 2 1) ((((((curry5-reverse-list1) 1) 2) 3) 4) 5))
+(test-equal "curry5-reverse-list1" '(5 4 3 2 1) (((((curry5-reverse-list 1) 2) 3) 4) 5))
 
 ;sum-every-nth
-(test-equal "sum-every-nth1" 3 (sum-every-nth '(0 0 1 0 0 1 0 0 1) 3))
+(test-equal "sum-every-nth1" 3 (sum-every-nth '(0 0 1 8 0 1 4 0 1) 3))
 (test-equal "sum-every-nth2" 3 (sum-every-nth '(1 1 1) 1))
 (test-equal "sum-every-nth3" 0 (sum-every-nth '() 1))
 (test-equal "sum-every-nth4" 0 (sum-every-nth '(1 2 3 4) 66))
 (test-equal "sum-every-nth5" 0 (sum-every-nth '(1 2 3 4) 0))
-(test-equal "sum-every-nth6" 4 (sum-every-nth '(1 0 1 0 1 0 1 0) -2))
+(test-equal "sum-every-nth6" 51 (sum-every-nth '(1 0 1 0 48 0 1 0) -2))
 
 ;sum-every-nth-lazy
-(test-equal "sum-every-nth-lazy1" 3 (sum-every-nth-lazy (make-lazy '(0 0 1 0 0 1 0 0 1)) 3))
+(test-equal "sum-every-nth-lazy1" 3 (sum-every-nth-lazy (make-lazy '(0 0 1 0 99 1 0 0 1)) 3))
 (test-equal "sum-every-nth-lazy2" 3 (sum-every-nth-lazy (make-lazy '(1 1 1)) 1))
 (test-equal "sum-every-nth-lazy3" 0 (sum-every-nth-lazy (make-lazy '()) 1))
-(test-equal "sum-every-nth-lazy4" 0 (sum-every-nth-lazy (make-lazy '(1 0 1 0 1 0 1)) 66))
-(test-equal "sum-every-nth-lazy5" 0 (sum-every-nth-lazy (make-lazy '(1 0 1 0 1 0 1)) 0))
+(test-equal "sum-every-nth-lazy4" 0 (sum-every-nth-lazy (make-lazy '(1 4 1 0 1 0 1)) 66))
+(test-equal "sum-every-nth-lazy5" 0 (sum-every-nth-lazy (make-lazy '(1 0 1 3 1 0 1)) 0))
 (test-assert "sum-every-nth-lazy6" (not (sum-every-nth-lazy (make-lazy '(1 0 1 0 1 0 1)) -1)))
 
 ;my-sum-optimized
 (test-equal "my-sum-optimized" 15 (my-sum-optimized '(1 2 3 4 5)))
+(test-equal "my-sum-optimized2" 9 (my-sum-optimized '(1 2 -3 4 5)))
 
 
 
