@@ -1,7 +1,7 @@
 ;;Written by Thien K. M. Bui
 ;;Programming Languages exam1 
 ;;Carleton College Winter '22
-;;Last editted 01/22/2022
+;;Last editted 01/27/2022
 
 
 ;reverse-reverse
