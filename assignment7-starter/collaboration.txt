@@ -1,0 +1,1 @@
+I did not consult with anyone else on this assignment, all code found in this folder, with the exception of test_m.py, is written by Thien K. M. Bui
