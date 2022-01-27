@@ -99,7 +99,7 @@
 (define reverse-lazy-list
     (lambda (lazy)
         (if (not lazy)
-            #f 
+            '() 
             (if (not ((cdr lazy)))
                 (list (car lazy))
                 (append (reverse-lazy-list ((cdr lazy))) (list (car lazy)))
