@@ -25,16 +25,6 @@
                 num-passed num-failed)))
     runner))
 
-;make-lazy
-;param: list 
-;return: lazy list with all elements from list
-(define make-lazy 
-    (lambda (list) 
-        (if (= (length list) 0)
-        #f 
-        (cons (car list) 
-            (lambda () (make-lazy (cdr list)))))))
-
 (load "main.scm")
 
 (test-runner-factory
