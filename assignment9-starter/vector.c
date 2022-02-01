@@ -1,6 +1,6 @@
 /* vector.c
 Written by Thien K. M. Bui and Victor Huang
-Last Editted 01/30/22
+Last Editted 01/31/22
 */
 #include <stdio.h>
 #include <stdlib.h>
