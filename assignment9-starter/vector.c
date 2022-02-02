@@ -1,6 +1,6 @@
 /* vector.c
 Written by Thien K. M. Bui and Victor Huang
-Last Editted 01/31/22
+Last Editted 02/02/22
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,9 +66,9 @@ int insert(Vector *vector, int location, int value)
             for (int i = 0; i < vector->size; i++)
             {
                 new_array[i] = vector->array[i];
-                free(vector->array);
-                vector->array = new_array;
             }
+            free(vector->array);
+            vector->array = new_array;
         }
         //insertion at the end
         //need to move all elements down
@@ -119,7 +119,6 @@ param: VECTOR *vector
 void cleanup(Vector *vector)
 {
     free(vector->array);
-    vector->array = malloc(vector->memorySize * sizeof(int));
 }
 
 /* Deletes value at location inside the Vector.  Return 1 for success, otherwise 
@@ -131,35 +130,21 @@ void cleanup(Vector *vector)
 
 int delete (Vector *vector, int location)
 {
-    return 0;
+    if (location < 0 || location > vector->size)
+    {
+        return 0;
+    }
+    else
+    {
+        if (location != vector->size)
+        {
+            for (int i = location; i < vector->size; i++)
+            {
+                //store the next value and swap with the previous one
+                vector->array[i] = vector->array[i+1];
+            }
+        }
+        vector->size = vector->size - 1;
+        return 1;
+    }
 }
-
-// int main()
-// {
-//     struct Vector *vector = (Vector *)malloc(sizeof(Vector));
-//     printf("Test 1.1...\n");
-//     init(vector, 100);
-
-//     int value;
-
-//     for (int i = 0; i < 50; i++)
-//     {
-//         insert(vector, 0, i);
-//     }
-//     print(vector);
-//     for (int i = -5; i < -2; i++)
-//     {
-//         int status = get(vector, i, &value);
-//         printf("check: %i\n", status);
-//     }
-
-//     // for (int i = 0; i < 50; i++)
-//     // {
-//     //     int status = get(vector, 50 - i - 1, &value);
-//     //     printf("status: %i ", status);
-//     //     printf("value: %i\n", value);
-//     //     // assert(i == value);
-//     // }
-//     int status = get(vector, 0, &value);
-//     printf("status: %i, value: %i\n", status, value);
-// }
