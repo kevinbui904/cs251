@@ -119,6 +119,7 @@ param: VECTOR *vector
 void cleanup(Vector *vector)
 {
     free(vector->array);
+    vector->size = 0;
 }
 
 /* Deletes value at location inside the Vector.  Return 1 for success, otherwise 
@@ -141,7 +142,7 @@ int delete (Vector *vector, int location)
             for (int i = location; i < vector->size; i++)
             {
                 //store the next value and swap with the previous one
-                vector->array[i] = vector->array[i+1];
+                vector->array[i] = vector->array[i + 1];
             }
         }
         vector->size = vector->size - 1;
