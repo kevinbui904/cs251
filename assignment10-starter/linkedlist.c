@@ -40,12 +40,11 @@ Value *cons(Value *newCar, Value *newCdr)
     Value *new_value = malloc(sizeof(Value));
     new_value->type = CONS_TYPE;
 
-    struct ConsCell *new_cons_cell = malloc(sizeof(*newCar) + sizeof(*newCdr));
-    new_cons_cell->car = newCar;
-    new_cons_cell->cdr = newCdr;
+    struct ConsCell new_cons_cell;
+    new_cons_cell.car = newCar;
+    new_cons_cell.cdr = newCdr;
 
     new_value->c = new_cons_cell;
-    free(new_cons_cell);
     return new_value;
 }
 
