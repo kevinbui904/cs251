@@ -1,12 +1,13 @@
 /*
 linkedlist.c
 Written by Victor Huang and Thien K. M. Bui
-Last modified 02/08/22 
+Last modified 02/08/22
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "linkedlist.h"
 
@@ -52,7 +53,7 @@ Value *cons(Value *newCar, Value *newCdr)
 // instructions for further explanation.
 Value *car(Value *list)
 {
-    //if not empty
+    // if not empty
     if (list->type == CONS_TYPE)
     {
         return list->c.car;
@@ -61,7 +62,7 @@ Value *car(Value *list)
     {
         return list;
     }
-    //error, should never be of type int/null here
+    // error, should never be of type int/null here
     else
     {
         assert(false != true && "Incorrect type, something went wrong --kb");
@@ -73,7 +74,7 @@ Value *car(Value *list)
 // list. Again use assertions to make sure that this is a legitimate operation.
 Value *cdr(Value *list)
 {
-    //if not empty
+    // if not empty
     if (list->type == CONS_TYPE)
     {
         return list->c.cdr;
@@ -100,10 +101,9 @@ void display(Value *list)
 
         if (current_value->type == CONS_TYPE)
         {
-
-            //copy over whatever addresses are in the current ConsCell, it'll get deleted anyway so it doesn't matter
+            // copy over whatever addresses are in the current ConsCell, it'll get deleted anyway so it doesn't matter
             struct ConsCell printed_value = current_value->c;
-            //check the type of the car cell (Value typed pointer)
+            // check the type of the car cell (Value typed pointer)
             switch (printed_value.car->type)
             {
             case INT_TYPE:
@@ -116,14 +116,13 @@ void display(Value *list)
                 printf("\"%s\" ", printed_value.car->s);
                 break;
             default:
-                printf("%i%f%s", printed_value.car->i, printed_value.car->d, printed_value.car->s);
+                printf("%i", printed_value.car->i);
             }
 
             current_value = cdr(current_value);
         }
         else
         {
-
             printf(")\n");
             at_end = true;
         }
@@ -148,7 +147,46 @@ void display(Value *list)
 // be after we've set up an easier way of managing memory.
 Value *reverse(Value *list)
 {
-    return false;
+    // copy over the current values into heap
+    Value *copied_value = malloc(sizeof(Value));
+    switch (car(list)->type)
+    {
+
+    case INT_TYPE:
+        copied_value->type = INT_TYPE;
+        copied_value->i = car(list)->i;
+        break;
+
+    case DOUBLE_TYPE:
+        copied_value->type = DOUBLE_TYPE;
+        copied_value->d = car(list)->d;
+        break;
+
+    case STR_TYPE:
+        copied_value->type = STR_TYPE;
+        copied_value->s = malloc(sizeof(char) * (strlen(car(list)->s) + 1));
+        strcpy(copied_value->s, car(list)->s);
+        break;
+    default:
+        break;
+    }
+
+    // at the last node of the list
+    if (isNull(cdr(list)))
+    {
+        free(list);
+        return cons(copied_value, makeNull());
+    }
+    // recursion step
+    else
+    {
+        // should only happens RIGHT after the base case is reached
+        Value *next = reverse(cdr(list));
+        display(next);
+        Value *cdr_next = cdr(next);
+        cdr_next = cons(copied_value, makeNull());
+        return cdr_next;
+    }
 }
 
 // Return the length of the given list, i.e., the number of cons cells.
@@ -192,7 +230,7 @@ int main()
     val1->i = 7;
     head = cons(val1, head);
 
-    display(head);
+    // display(head);
     Value *val2 = malloc(sizeof(Value));
     val2->type = DOUBLE_TYPE;
     val2->d = 4.999;
@@ -200,6 +238,13 @@ int main()
 
     // assert(length(head) == correctLength);
     display(head);
-    printf("%f check this\n", car(head)->d);
-    printf("%i check this 2\n", car(cdr(head))->i);
+    // printf("%f check this\n", car(head)->d);
+    // printf("%i check this 2\n", car(cdr(head))->i);
+    // printf("%i check this 3\n", car(cdr(cdr(head)))->i);
+    // if (isNull(cdr(head)))
+    // {
+    //     printf("this should print");
+    // }
+    reverse(head);
+    display(head);
 }
