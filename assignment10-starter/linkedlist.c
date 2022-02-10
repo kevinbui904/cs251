@@ -150,31 +150,36 @@ Value *reverse(Value *list)
     // copy over the current values into heap
     Value *head = list;
     Value *new_head = makeNull();
-    switch (car(list)->type)
+
+    // at the last node of the list
+    while (!isNull(head))
     {
 
-    case INT_TYPE:
-        new_head->type = INT_TYPE;
-        new_head->i = car(list)->i;
-        break;
+        Value *copy = malloc(sizeof(Value));
+        switch (car(head)->type)
+        {
 
-    case DOUBLE_TYPE:
-        new_head->type = DOUBLE_TYPE;
-        new_head->d = car(list)->d;
-        break;
+        case INT_TYPE:
+            copy->type = INT_TYPE;
+            copy->i = car(head)->i;
+            break;
 
-    case STR_TYPE:
-        new_head->type = STR_TYPE;
-        new_head->s = malloc(sizeof(char) * (strlen(car(list)->s) + 1));
-        strcpy(new_head->s, car(list)->s);
-        break;
-    default:
-        break;
-    }
-    // at the last node of the list
-    while (!isNull(head)){
+        case DOUBLE_TYPE:
+            copy->type = DOUBLE_TYPE;
+            copy->d = car(head)->d;
+            break;
+
+        case STR_TYPE:
+            copy->type = STR_TYPE;
+            copy->s = malloc(sizeof(char) * (strlen(car(head)->s) + 1));
+            strcpy(copy->s, car(head)->s);
+            break;
+        default:
+            break;
+        }
+
         Value *temporary = new_head;
-        new_head = cons(car(head), temporary);
+        new_head = cons(copy, temporary);
         head = cdr(head);
     }
     return new_head;
@@ -184,10 +189,13 @@ Value *reverse(Value *list)
 // Use assertions to make sure that this is a legitimate operation.
 int length(Value *value)
 {
+
     int length = 0;
     Value *current = value;
-    while(!isNull(current)){
+    while (!isNull(current))
+    {
         length = length + 1;
+        current = cdr(current);
     }
     return length;
 }
@@ -207,24 +215,25 @@ int length(Value *value)
 // be after we've set up an easier way of managing memory.
 void cleanup(Value *list)
 {
-    switch(list->type){
-        case INT_TYPE:
-            free(list);
-            break;
-        case DOUBLE_TYPE:
-            free(list);
-            break;
-        case STR_TYPE:
-            free(list->s);
-            free(list);
-            break;
-        case NULL_TYPE:
-            free(list);
-            break;
-        case CONS_TYPE:
-            cleanup(car(list));
-            cleanup(cdr(list));
-            free(list);
-            break;
+    switch (list->type)
+    {
+    case INT_TYPE:
+        free(list);
+        break;
+    case DOUBLE_TYPE:
+        free(list);
+        break;
+    case STR_TYPE:
+        free(list->s);
+        free(list);
+        break;
+    case NULL_TYPE:
+        free(list);
+        break;
+    case CONS_TYPE:
+        cleanup(car(list));
+        cleanup(cdr(list));
+        free(list);
+        break;
     }
 }
