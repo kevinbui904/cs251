@@ -1,7 +1,7 @@
 /*
 linkedlist.c
 Written by Victor Huang and Thien K. M. Bui
-Last modified 02/08/22
+Last modified 02/09/22
 */
 
 #include <stdio.h>
@@ -148,52 +148,48 @@ void display(Value *list)
 Value *reverse(Value *list)
 {
     // copy over the current values into heap
-    Value *copied_value = malloc(sizeof(Value));
+    Value *head = list;
+    Value *new_head = makeNull();
     switch (car(list)->type)
     {
 
     case INT_TYPE:
-        copied_value->type = INT_TYPE;
-        copied_value->i = car(list)->i;
+        new_head->type = INT_TYPE;
+        new_head->i = car(list)->i;
         break;
 
     case DOUBLE_TYPE:
-        copied_value->type = DOUBLE_TYPE;
-        copied_value->d = car(list)->d;
+        new_head->type = DOUBLE_TYPE;
+        new_head->d = car(list)->d;
         break;
 
     case STR_TYPE:
-        copied_value->type = STR_TYPE;
-        copied_value->s = malloc(sizeof(char) * (strlen(car(list)->s) + 1));
-        strcpy(copied_value->s, car(list)->s);
+        new_head->type = STR_TYPE;
+        new_head->s = malloc(sizeof(char) * (strlen(car(list)->s) + 1));
+        strcpy(new_head->s, car(list)->s);
         break;
     default:
         break;
     }
-
     // at the last node of the list
-    if (isNull(cdr(list)))
-    {
-        free(list);
-        return cons(copied_value, makeNull());
+    while (!isNull(head)){
+        Value *temporary = new_head;
+        new_head = cons(car(head), temporary);
+        head = cdr(head);
     }
-    // recursion step
-    else
-    {
-        // should only happens RIGHT after the base case is reached
-        Value *next = reverse(cdr(list));
-        display(next);
-        Value *cdr_next = cdr(next);
-        cdr_next = cons(copied_value, makeNull());
-        return cdr_next;
-    }
+    return new_head;
 }
 
 // Return the length of the given list, i.e., the number of cons cells.
 // Use assertions to make sure that this is a legitimate operation.
 int length(Value *value)
 {
-    return false;
+    int length = 0;
+    Value *current = value;
+    while(!isNull(current)){
+        length = length + 1;
+    }
+    return length;
 }
 
 // Free up all memory directly or indirectly referred to by list. This includes
@@ -211,40 +207,24 @@ int length(Value *value)
 // be after we've set up an easier way of managing memory.
 void cleanup(Value *list)
 {
-}
-
-int main()
-{
-    Value *head = makeNull();
-    int correctLength = 0;
-    assert(length(head) == correctLength);
-
-    // 2. Reverse the empty list: ( )
-    // Value *reverseLengthZero = reverse(head);
-    // assert(length(reverseLengthZero) == correctLength);
-    // cleanup(reverseLengthZero);
-
-    // 3.1 Cons a new cell at the head of the list: ( 7 )
-    Value *val1 = malloc(sizeof(Value)); // This will have to be freed eventually!
-    val1->type = INT_TYPE;
-    val1->i = 7;
-    head = cons(val1, head);
-
-    // display(head);
-    Value *val2 = malloc(sizeof(Value));
-    val2->type = DOUBLE_TYPE;
-    val2->d = 4.999;
-    head = cons(val2, head);
-
-    // assert(length(head) == correctLength);
-    display(head);
-    // printf("%f check this\n", car(head)->d);
-    // printf("%i check this 2\n", car(cdr(head))->i);
-    // printf("%i check this 3\n", car(cdr(cdr(head)))->i);
-    // if (isNull(cdr(head)))
-    // {
-    //     printf("this should print");
-    // }
-    reverse(head);
-    display(head);
+    switch(list->type){
+        case INT_TYPE:
+            free(list);
+            break;
+        case DOUBLE_TYPE:
+            free(list);
+            break;
+        case STR_TYPE:
+            free(list->s);
+            free(list);
+            break;
+        case NULL_TYPE:
+            free(list);
+            break;
+        case CONS_TYPE:
+            cleanup(car(list));
+            cleanup(cdr(list));
+            free(list);
+            break;
+    }
 }
