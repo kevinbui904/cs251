@@ -5,6 +5,7 @@ Last editted 02-11-2022
 */
 
 #include <stdlib.h>
+#include <assert.h>
 #include "value.h"
 #include "talloc.h"
 
@@ -82,7 +83,7 @@ void tfree()
 {
     Value *current = head_talloc;
     cleanup(current);
-    *head_talloc = NULL;
+    head_talloc = NULL;
 }
 
 // Replacement for the C function 'exit' that consists of two lines: it calls
