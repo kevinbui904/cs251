@@ -6,8 +6,10 @@ Last editted 02-11-2022
 
 #include <stdlib.h>
 #include <assert.h>
+
 #include "value.h"
 #include "talloc.h"
+#include <stdio.h>
 
 // store head of talloc list
 Value *head_talloc = NULL;
@@ -26,7 +28,7 @@ void *talloc(size_t size)
     // make new PTR Value
     Value *new_ptr = malloc(sizeof(Value));
     new_ptr->type = PTR_TYPE;
-    new_ptr->p = malloc(sizeof(size));
+    new_ptr->p = malloc(size);
 
     // make new CONS (act as linked nodes) car will be the new head, and cdr will be the previous head
     Value *new_cons = malloc(sizeof(Value));
@@ -40,8 +42,8 @@ void *talloc(size_t size)
 
         new_cons->c.car = new_ptr;
         new_cons->c.cdr = null_value;
-        head_talloc = new_ptr;
-        return head_talloc;
+        head_talloc = new_cons;
+        return new_ptr->p;
     }
     else
     {
@@ -49,7 +51,7 @@ void *talloc(size_t size)
         new_cons->c.car = new_ptr;
         new_cons->c.cdr = head_talloc;
         head_talloc = new_cons;
-        return head_talloc;
+        return new_ptr->p;
     }
 }
 
@@ -64,14 +66,30 @@ void cleanup(Value *head)
     }
     else
     {
-        // check if valid
-        if (head->type != PTR_TYPE)
+        // need to free up the NODES too
+        switch (head->type)
         {
-            assert(100 != 99 && "ValueType error, not PTR_TYPE --kb");
-        }
-        else
-        {
+        // go inside the address stored at the ptr, and free those as well
+        case PTR_TYPE:
+            cleanup(head->p);
             free(head);
+            break;
+        case INT_TYPE:
+            free(head);
+            break;
+
+        case DOUBLE_TYPE:
+            free(head);
+            break;
+        case STR_TYPE:
+            free(head->s);
+            free(head);
+            break;
+        case NULL_TYPE:
+            free(head);
+            break;
+        default:
+            printf("what the fuck\n");
         }
     }
 }
@@ -82,7 +100,9 @@ void cleanup(Value *head)
 void tfree()
 {
     Value *current = head_talloc;
+
     cleanup(current);
+
     head_talloc = NULL;
 }
 
@@ -96,7 +116,17 @@ void texit(int status)
     exit(status);
 }
 
-int main()
-{
-    return 1;
-}
+// int main()
+// {
+//     int *x = talloc(sizeof(int));
+//     int *y = talloc(sizeof(int));
+
+//     int *z = talloc(sizeof(int));
+//     tfree();
+
+//     //     *x = 4;
+//     //     *y = 5;
+//     //     *z = 6;
+//     //     printf("%i, %i, %i\n", *x, *y, *z);
+//     //     tfree();
+// }

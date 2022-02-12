@@ -8,7 +8,8 @@
 #include "value.h"
 #include "talloc.h"
 
-void testForward(Value *head, int correctLength) {
+void testForward(Value *head, int correctLength)
+{
   Value *value = head;
   assert(CONS_TYPE == value->type);
   assert(DOUBLE_TYPE == car(value)->type);
@@ -51,7 +52,8 @@ void testForward(Value *head, int correctLength) {
   assert(!isNull(head));
 }
 
-void testBackward(Value *head, int correctLength) {
+void testBackward(Value *head, int correctLength)
+{
   Value *value = head;
 
   assert(CONS_TYPE == value->type);
@@ -95,8 +97,8 @@ void testBackward(Value *head, int correctLength) {
   assert(!isNull(head));
 }
 
-
-int main() {
+int main()
+{
 
   // 1. Create a null value (representing an empty list)
   printf("Test 1...\n");
@@ -134,20 +136,20 @@ int main() {
   printf("\t\t");
   display(head);
   printf("\tPASSED\n\n");
-  
+
   // 5. Cons a new cell at the front of the existing list: ( "5.0s" 6.00 7 )
   printf("Test 5...\n");
   Value *val3 = talloc(sizeof(Value));
   val3->type = STR_TYPE;
   char *text = "5.0s";
-  val3->s = talloc(sizeof(char)*(strlen(text) + 1));
+  val3->s = talloc(sizeof(char) * (strlen(text) + 1));
   strcpy(val3->s, text);
   head = cons(val3, head);
   correctLength++;
   printf("\t\t");
   display(head);
   printf("\tPASSED\n\n");
-  
+
   // 6. Cons a new cell at the front of the existing list: ( 4.00000 "5.0s" 6.00 7 )
   printf("Test 6...\n");
   Value *val4 = talloc(sizeof(Value));
@@ -164,8 +166,8 @@ int main() {
   Value *val5 = talloc(sizeof(Value));
   val5->type = STR_TYPE;
   text = "3.0s";
-  val5->s = talloc(sizeof(char)*(strlen(text) + 1));
-  strcpy(val5->s,text);
+  val5->s = talloc(sizeof(char) * (strlen(text) + 1));
+  strcpy(val5->s, text);
   head = cons(val5, head);
   correctLength++;
   printf("\t\t");
@@ -177,9 +179,9 @@ int main() {
   Value *val6 = talloc(sizeof(Value));
   val6->type = STR_TYPE;
   text = "2.0s";
-  val6->s = talloc(sizeof(char)*(strlen(text) + 1));
-  strcpy(val6->s,text);
-  head = cons(val6,head);
+  val6->s = talloc(sizeof(char) * (strlen(text) + 1));
+  strcpy(val6->s, text);
+  head = cons(val6, head);
   correctLength++;
   printf("\t\t");
   display(head);
@@ -190,12 +192,12 @@ int main() {
   Value *val7 = talloc(sizeof(Value));
   val7->type = DOUBLE_TYPE;
   val7->d = 1.0;
-  head = cons(val7,head);
+  head = cons(val7, head);
   correctLength++;
   printf("\t\t");
   display(head);
   printf("\tPASSED\n\n");
-  
+
   // 10. Make sure everything is in the correct order
   printf("Test 10...\n");
   testForward(head, correctLength);
@@ -216,9 +218,11 @@ int main() {
   // 13. Verify that neither of the lists share identical cons cells
   printf("Test 13...\n");
   Value *headcur = head;
-  while (headcur->type != NULL_TYPE) {
+  while (headcur->type != NULL_TYPE)
+  {
     Value *revcur = rev;
-    while (revcur->type != NULL_TYPE) {
+    while (revcur->type != NULL_TYPE)
+    {
       assert(headcur != revcur);
       revcur = revcur->c.cdr;
     }
