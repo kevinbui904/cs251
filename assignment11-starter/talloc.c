@@ -58,39 +58,15 @@ void *talloc(size_t size)
 // helper function to make freeing all associated memories of talloc easy
 void cleanup(Value *head)
 {
-    if (head->type == CONS_TYPE)
+    if (head->type == NULL_TYPE)
     {
-        cleanup(head->c.car);
-        cleanup(head->c.cdr);
         free(head);
     }
     else
     {
-        // need to free up the NODES too
-        switch (head->type)
-        {
-        // go inside the address stored at the ptr, and free those as well
-        case PTR_TYPE:
-            cleanup(head->p);
-            free(head);
-            break;
-        case INT_TYPE:
-            free(head);
-            break;
-
-        case DOUBLE_TYPE:
-            free(head);
-            break;
-        case STR_TYPE:
-            free(head->s);
-            free(head);
-            break;
-        case NULL_TYPE:
-            free(head);
-            break;
-        default:
-            printf("what the fuck\n");
-        }
+        free(head->c.car);
+        free(head->p);
+        cleanup(head->c.cdr);
     }
 }
 

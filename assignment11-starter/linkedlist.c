@@ -129,35 +129,23 @@ void display(Value *list)
     }
 }
 
-// Return a new list that is the reverse of the one that is passed in. All
-// content within the list should be duplicated; there should be no shared
-// memory whatsoever between the original list and the new one. Use your
-// cons(), car(), and cdr() functions from above -- but be sure that you
-// don't end up pointing to memory used by the old list! Hint: this means
-// that you'll need to make copies of the Value structs that serve as car
-// values for the cons cells in the original list; more specifically, you'll
-// want to talloc new space for them on the heap. In the case of a string,
-// the strlen() function will come in handy, in addition to strcpy(); note
-// that strlen() will not include the null terminator in its count. To use
-// these functions, you'll need to include <string.h> above.
-
-// FAQ: What if there are nested lists inside that list?
-
-// ANS: There won't be for this assignment. There will be later, but that will
-// be after we've set up an easier way of managing memory.
+// Return a new list that is the reverse of the one that is passed in. None of
+// the values in the original linked list should be copied this time. Instead,
+// create a new linked list of CONS_TYPE nodes whose car values point to the
+// corresponding car values in the original list.
 Value *reverse(Value *list)
 {
     // copy over the current values into heap
-    Value *head = list;
-    Value *new_head = makeNull();
+    Value *current = list;
+    Value *reverse_list = makeNull();
 
     // at the last node of the list
-    while (!isNull(head))
+    while (!isNull(current))
     {
-        new_head = cons(car(head), new_head);
-        head = cdr(head);
+        reverse_list = cons(car(current), reverse_list);
+        current = cdr(current);
     }
-    return new_head;
+    return reverse_list;
 }
 
 // Return the length of the given list, i.e., the number of cons cells.
