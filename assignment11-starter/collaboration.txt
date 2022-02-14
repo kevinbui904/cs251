@@ -1,0 +1,1 @@
+All codes in talloc.c and linkedlist.c were written by Victor Huang and Thien K. M. Bui, but we did receive some help from prefect Thomas Zheng.
