@@ -1,7 +1,7 @@
 /*
 talloc.c
 Written by Victor Huang and Thien K. M. Bui
-Last editted 02-11-2022
+Last editted 02-13-2022
 */
 
 #include <stdlib.h>
@@ -9,7 +9,6 @@ Last editted 02-11-2022
 
 #include "value.h"
 #include "talloc.h"
-#include <stdio.h>
 
 // store head of talloc list
 Value *head_talloc = NULL;
@@ -61,12 +60,15 @@ void cleanup(Value *head)
     if (head->type == NULL_TYPE)
     {
         free(head);
+    }else if(head->type == PTR_TYPE){
+        free(head->p);
+        free(head);
     }
     else
     {
-        free(head->c.car);
-        free(head->p);
+        cleanup(head->c.car);
         cleanup(head->c.cdr);
+        free(head);
     }
 }
 
@@ -91,18 +93,3 @@ void texit(int status)
     tfree();
     exit(status);
 }
-
-// int main()
-// {
-//     int *x = talloc(sizeof(int));
-//     int *y = talloc(sizeof(int));
-
-//     int *z = talloc(sizeof(int));
-//     tfree();
-
-//     //     *x = 4;
-//     //     *y = 5;
-//     //     *z = 6;
-//     //     printf("%i, %i, %i\n", *x, *y, *z);
-//     //     tfree();
-// }

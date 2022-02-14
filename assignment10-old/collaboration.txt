@@ -1,0 +1,3 @@
+https://www.tutorialspoint.com/cprogramming/switch_statement_in_c.htm#:~:text=The%20syntax%20for%20a%20switch%20statement%20in%20C,%2A%2F%20default%20%3A%20%2F%2A%20Optional%20%2A%2F%20statement%28s%29%3B%20%7D
+
+https://www.tutorialspoint.com/c_standard_library/c_function_strlen.htm
