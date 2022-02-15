@@ -1,7 +1,7 @@
 /*
 linkedlist.c
 Written by Victor Huang and Thien K. M. Bui
-Last modified 02/09/22
+Last modified 02/12/22
 */
 
 #include <stdio.h>
@@ -10,12 +10,12 @@ Last modified 02/09/22
 #include <string.h>
 
 #include "linkedlist.h"
-
+#include "talloc.h"
 // Create a pointer to a new NULL_TYPE Value (hint: where in memory will
 // the Value have to live?)
 Value *makeNull()
 {
-    Value *new_null = malloc(sizeof(Value));
+    Value *new_null = talloc(sizeof(Value));
     new_null->type = NULL_TYPE;
 
     return new_null;
@@ -36,7 +36,7 @@ bool isNull(Value *value)
 // Create a pointer to a new CONS_TYPE Value
 Value *cons(Value *newCar, Value *newCdr)
 {
-    Value *new_value = malloc(sizeof(Value));
+    Value *new_value = talloc(sizeof(Value));
     new_value->type = CONS_TYPE;
 
     struct ConsCell new_cons_cell;
@@ -129,60 +129,23 @@ void display(Value *list)
     }
 }
 
-// Return a new list that is the reverse of the one that is passed in. All
-// content within the list should be duplicated; there should be no shared
-// memory whatsoever between the original list and the new one. Use your
-// cons(), car(), and cdr() functions from above -- but be sure that you
-// don't end up pointing to memory used by the old list! Hint: this means
-// that you'll need to make copies of the Value structs that serve as car
-// values for the cons cells in the original list; more specifically, you'll
-// want to malloc new space for them on the heap. In the case of a string,
-// the strlen() function will come in handy, in addition to strcpy(); note
-// that strlen() will not include the null terminator in its count. To use
-// these functions, you'll need to include <string.h> above.
-
-// FAQ: What if there are nested lists inside that list?
-
-// ANS: There won't be for this assignment. There will be later, but that will
-// be after we've set up an easier way of managing memory.
+// Return a new list that is the reverse of the one that is passed in. None of
+// the values in the original linked list should be copied this time. Instead,
+// create a new linked list of CONS_TYPE nodes whose car values point to the
+// corresponding car values in the original list.
 Value *reverse(Value *list)
 {
     // copy over the current values into heap
-    Value *head = list;
-    Value *new_head = makeNull();
+    Value *current = list;
+    Value *reverse_list = makeNull();
 
     // at the last node of the list
-    while (!isNull(head))
+    while (!isNull(current))
     {
-
-        Value *copy = malloc(sizeof(Value));
-        switch (car(head)->type)
-        {
-
-        case INT_TYPE:
-            copy->type = INT_TYPE;
-            copy->i = car(head)->i;
-            break;
-
-        case DOUBLE_TYPE:
-            copy->type = DOUBLE_TYPE;
-            copy->d = car(head)->d;
-            break;
-
-        case STR_TYPE:
-            copy->type = STR_TYPE;
-            copy->s = malloc(sizeof(char) * (strlen(car(head)->s) + 1));
-            strcpy(copy->s, car(head)->s);
-            break;
-        default:
-            break;
-        }
-
-        Value *temporary = new_head;
-        new_head = cons(copy, temporary);
-        head = cdr(head);
+        reverse_list = cons(car(current), reverse_list);
+        current = cdr(current);
     }
-    return new_head;
+    return reverse_list;
 }
 
 // Return the length of the given list, i.e., the number of cons cells.
@@ -198,42 +161,4 @@ int length(Value *value)
         current = cdr(current);
     }
     return length;
-}
-
-// Free up all memory directly or indirectly referred to by list. This includes
-// strings, because in the Value defintion these are pointers to character arrays.
-
-// FAQ: What if a string being pointed to is a string literal? That throws an
-// error when freeing.
-
-// ANS: Don't put a string literal into the list in the first place. All strings
-// added to this list should be able to be free'd by the cleanup function.
-
-// FAQ: What if there are nested lists inside that list?
-
-// ANS: There won't be for this assignment. There will be later, but that will
-// be after we've set up an easier way of managing memory.
-void cleanup(Value *list)
-{
-    switch (list->type)
-    {
-    case INT_TYPE:
-        free(list);
-        break;
-    case DOUBLE_TYPE:
-        free(list);
-        break;
-    case STR_TYPE:
-        free(list->s);
-        free(list);
-        break;
-    case NULL_TYPE:
-        free(list);
-        break;
-    case CONS_TYPE:
-        cleanup(car(list));
-        cleanup(cdr(list));
-        free(list);
-        break;
-    }
 }
