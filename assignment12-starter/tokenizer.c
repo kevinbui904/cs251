@@ -46,7 +46,7 @@ Value *tokenize()
     next_char = (char)fgetc(stdin);
 
     // used to store temporary strings
-    char *temporary_string = malloc(sizeof(char) * 300);
+    char *temp_symbol = malloc(sizeof(char) * 300);
 
     // Start tokenizing!
     while (next_char != EOF)
@@ -58,55 +58,106 @@ Value *tokenize()
         Value *new_cons_cell = talloc(sizeof(Value));
         new_cons_cell->type = CONS_TYPE;
 
-        switch (next_char)
-        {
         // make closings
-        case '(':
+        if (next_char == '(')
+        {
+
             new_token->type = OPEN_TYPE;
             new_cons_cell = cons(new_token, tokens_list);
             tokens_list = new_cons_cell;
-
-            break;
-        // need to account for end condition in case there no space before last )
-        case ')':
-            printf("%s: end here\n", temporary_string);
+        }
+        // need to account for end condition in if () there no space before last )
+        else if (next_char == ')')
+        {
+            printf("%s: end here\n", temp_symbol);
             new_token->type = CLOSE_TYPE;
             new_cons_cell = cons(new_token, tokens_list);
             tokens_list = new_cons_cell;
-            break;
+        }
+
+        // check for string (special else if (next_char ==since double quotes are not to be used as a symbol)
+        else if (next_char == '"')
+        {
+            // if it's a malformed string (mismatched double quotes), throw an error
+
+            // need to set to the next character right away else the check for terminating double quotes won't work
+            next_char = (char)fgetc(stdin);
+            while (next_char != EOF && 1)
+            {
+                // well formed string, make string literal
+                if (next_char == '"')
+                {
+                    break;
+                }
+                else
+                {
+                    temp_symbol[strlen(temp_symbol)] = next_char;
+                    next_char = (char)fgetc(stdin);
+                }
+            }
+            // if malformed string just throw error
+            if (next_char == EOF)
+            {
+                assert(1 == 0 && "TokenizeError: malformatted string literals");
+            }
+            else
+            {
+                // copy over string
+                // NOTE: only - 1 because the temp_string DOES NOT include the first double quote
+                char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
+
+                for (int i = 1; i < strlen(temp_symbol) - 1; i++)
+                {
+                    copy[i - 1] = temp_symbol[i];
+                }
+
+                // store string (char*) into Value new_string
+                new_token->s = copy;
+
+                free(temp_symbol);
+                temp_symbol = malloc(sizeof(char) * 300);
+                new_token->type = STR_TYPE;
+                new_cons_cell = cons(new_token, tokens_list);
+                tokens_list = new_cons_cell;
+            }
+        }
         // check for empty space (used as delimiter)
-        case ' ':
+        else if (next_char == ' ')
+        {
             // check if valid string (check for quotes at beginning and end of stirng)
-            if (isString(temporary_string))
-            {
-                printf("valid string: %s", temporary_string);
-            }
-            // if there's an opening quote but no terminating
-            else if (temporary_string[0] == (char)34)
-            {
-                printf("doesn't wo0rk");
-            }
-            // if there's only a terminating quote
-            else if (temporary_string[strlen(temporary_string)] == (char)34)
-            {
-            }
+            // if (isString(temporary_string))
+            // {
+            //     printf("valid string: %s", temporary_string);
+            // }
+            // // if there's an opening quote but no terminating
+            // else if (temporary_string[0] == (char)34)
+            // {
+            //     printf("doesn't wo0rk");
+            // }
+            // // if there's only a terminating quote
+            // else if (temporary_string[strlen(temporary_string)] == (char)34)
+            // {
+            // }
             // check if valid number
 
             // check if valid symbol
-            printf("%s\n", temporary_string);
-            free(temporary_string);
-            temporary_string = malloc(sizeof(char) * 300);
-            break;
-        // end of line character need to be catched
-        case '\n':
+            printf("%s\n", temp_symbol);
+            free(temp_symbol);
+            temp_symbol = malloc(sizeof(char) * 300);
+
+            // end of line character need to be catched
+        }
+        else if (next_char == '\n')
+        {
             printf("line break");
-            break;
+        }
 
         // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
-        default:
+        else
+        {
             // assignment specificity, all strings will only be 300 characters long
 
-            temporary_string[strlen(temporary_string)] = next_char;
+            temp_symbol[strlen(temp_symbol)] = next_char;
         }
 
         next_char = (char)fgetc(stdin);
