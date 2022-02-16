@@ -35,6 +35,17 @@ int isString(char *str)
     }
 }
 
+/*
+validSymbol(char* s)
+helper function to check for malformatted symbols
+multi-char symbol cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^
+single-char symbols cannot be a number
+*/
+int validSymbol(char *s)
+{
+    return 1;
+}
+
 Value *tokenize()
 {
 
@@ -69,10 +80,42 @@ Value *tokenize()
         // need to account for end condition in if () there no space before last )
         else if (next_char == ')')
         {
-            printf("%s: end here\n", temp_symbol);
-            new_token->type = CLOSE_TYPE;
-            new_cons_cell = cons(new_token, tokens_list);
-            tokens_list = new_cons_cell;
+            // if temp_symbol is not freed (no space before closing is allowed)
+            if (strlen(temp_symbol) > 0)
+            {
+                if (validSymbol(temp_symbol))
+                {
+                    new_token->type = SYMBOL_TYPE;
+
+                    char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
+                    for (int i = 0; i < strlen(temp_symbol); i++)
+                    {
+                        copy[i] = temp_symbol[i];
+                    }
+                    new_token->s = copy;
+
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                    free(temp_symbol);
+                    temp_symbol = malloc(sizeof(char) * 300);
+
+                    // special case
+                    Value *null_token = talloc(sizeof(Value));
+                    null_token->type = CLOSE_TYPE;
+                    new_cons_cell = cons(null_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                }
+                else
+                {
+                    assert(1 == 0 && "TokenizeError: symbol contains a non allowed character");
+                }
+            }
+            else
+            {
+                new_token->type = CLOSE_TYPE;
+                new_cons_cell = cons(new_token, tokens_list);
+                tokens_list = new_cons_cell;
+            }
         }
 
         // check for string (special else if (next_char ==since double quotes are not to be used as a symbol)
@@ -106,52 +149,70 @@ Value *tokenize()
                 // NOTE: only - 1 because the temp_string DOES NOT include the first double quote
                 char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
 
-                for (int i = 1; i < strlen(temp_symbol) - 1; i++)
+                for (int i = 0; i < strlen(temp_symbol); i++)
                 {
-                    copy[i - 1] = temp_symbol[i];
+                    copy[i] = temp_symbol[i];
                 }
 
                 // store string (char*) into Value new_string
-                new_token->s = copy;
 
                 free(temp_symbol);
                 temp_symbol = malloc(sizeof(char) * 300);
+
                 new_token->type = STR_TYPE;
+                new_token->s = copy;
+
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
             }
         }
-        // check for empty space (used as delimiter)
+        // check for empty space (used as delimiter), if hit, just restart the temporary symbol
         else if (next_char == ' ')
         {
-            // check if valid string (check for quotes at beginning and end of stirng)
-            // if (isString(temporary_string))
-            // {
-            //     printf("valid string: %s", temporary_string);
-            // }
-            // // if there's an opening quote but no terminating
-            // else if (temporary_string[0] == (char)34)
-            // {
-            //     printf("doesn't wo0rk");
-            // }
-            // // if there's only a terminating quote
-            // else if (temporary_string[strlen(temporary_string)] == (char)34)
-            // {
-            // }
-            // check if valid number
+            // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
+            if (validSymbol(temp_symbol))
+            {
+                new_token->type = SYMBOL_TYPE;
 
-            // check if valid symbol
-            printf("%s\n", temp_symbol);
-            free(temp_symbol);
-            temp_symbol = malloc(sizeof(char) * 300);
+                // copy over the symbol only if the symbol is not empty
+                if (strlen(temp_symbol) > 0)
+                {
+                    char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
+                    for (int i = 0; i < strlen(temp_symbol); i++)
+                    {
+                        copy[i] = temp_symbol[i];
+                    }
+                    new_token->s = copy;
+
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                    free(temp_symbol);
+                    temp_symbol = malloc(sizeof(char) * 300);
+                }
+            }
+            else
+            {
+                assert(1 == 0 && "TokenizeError: symbol contains a non allowed character");
+            }
 
             // end of line character need to be catched
         }
+        // if semicolon is seen, ignore the rest of this line
+        else if (next_char == ';')
+        {
+            while (next_char != '\n' && next_char != EOF)
+            {
+                next_char = (char)fgetc(stdin);
+            }
+        }
+        // ignore newline characters
         else if (next_char == '\n')
         {
-            printf("line break");
+            while (next_char != '\n' && next_char != EOF)
+            {
+                next_char = (char)fgetc(stdin);
+            }
         }
-
         // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
         else
         {
@@ -187,8 +248,14 @@ void displayTokens(Value *list)
         case CLOSE_TYPE:
             printf("):close\n");
             break;
+        case STR_TYPE:
+            printf("\"%s\":string\n", car(current)->s);
+            break;
+        case SYMBOL_TYPE:
+            printf("%s:symbol\n", car(current)->s);
+            break;
         default:
-            printf("not yet implemented");
+            printf("not yet implemented\n");
         }
         current = cdr(current);
     }
