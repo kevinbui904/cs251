@@ -41,7 +41,6 @@ validInitialCharacter()
 */
 int validInitialCharacter(char c)
 {
-    printf("check validInitialChar: %c\n", c);
     if (isalpha(c))
     {
         return 1;
@@ -118,7 +117,6 @@ single-char symbols cannot be a number
 */
 int validSymbol(char *s)
 {
-    printf("check this too: %s\n", s);
     // check that initial is of a valid character
     if (validInitialCharacter(s[0]) && validSubsequentCharacters(s))
     {
@@ -130,6 +128,50 @@ int validSymbol(char *s)
     }
 }
 
+/*
+validNumber()
+<number>   ->  <sign> <ureal> | <ureal>
+<sign>     ->  + | -
+<ureal>    ->  <uinteger> | <udecimal>
+<uinteger> ->  <digit>+
+<udecimal> ->  . <digit>+ | <digit>+ . <digit>*
+<digit>    ->  0 | 1 | ... | 9
+*/
+int validNumber(char *s)
+{
+    printf("here:===%s\n", s);
+    if (s[0] == '+' || s[0] == '-' || isdigit(s[0]))
+    {
+        int decimal_point_count = 0;
+
+        for (int i = 1; i < strlen(s); i++)
+        {
+            // if char is not "." or isn't a digit
+            if (s[i] != '.' || !isdigit(s[i]))
+            {
+                return 0;
+            }
+            if (s[i] == '.')
+            {
+                decimal_point_count = decimal_point_count + 1;
+            }
+            if (decimal_point_count > 1)
+            {
+                return 0;
+            }
+        }
+
+        if (decimal_point_count == 1)
+        {
+            return 2;
+        }
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 Value *tokenize()
 {
 
@@ -153,12 +195,6 @@ Value *tokenize()
         Value *new_cons_cell = talloc(sizeof(Value));
         new_cons_cell->type = CONS_TYPE;
 
-        // go to the first non space
-        while (next_char == ' ')
-        {
-            next_char = (char)fgetc(stdin);
-        }
-        // make closings
         if (next_char == '(')
         {
 
@@ -269,6 +305,21 @@ Value *tokenize()
                     temp_symbol = malloc(sizeof(char) * 300);
                 }
             }
+            // check if valid number (see grammar up top)
+            else if (validNumber(temp_symbol) == 1)
+            {
+                new_token->type = INT_TYPE;
+                new_token->i = strtol(temp_symbol, NULL, 10);
+                tokens_list = new_cons_cell;
+                temp_symbol = malloc(sizeof(char) * 300);
+            }
+            else if (validNumber(temp_symbol) == 2)
+            {
+                new_token->type = DOUBLE_TYPE;
+                new_token->d = strtod(temp_symbol, NULL);
+                tokens_list = new_cons_cell;
+                temp_symbol = malloc(sizeof(char) * 300);
+            }
             else
             {
                 assert(1 == 0 && "TokenizeError: symbol contains a non allowed character");
@@ -328,7 +379,10 @@ Value *tokenize()
         // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
         else
         {
-            temp_symbol[strlen(temp_symbol)] = next_char;
+            if (next_char != ' ')
+            {
+                temp_symbol[strlen(temp_symbol)] = next_char;
+            }
         }
         next_char = (char)fgetc(stdin);
     }

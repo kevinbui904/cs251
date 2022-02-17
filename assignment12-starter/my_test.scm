@@ -1,1 +1,2 @@
-( ) #t #f "string" x y z ;;comment 3
+( ) #t #f 1 0 -1 "string" 1.01 x y z ;;comment 3
+
