@@ -1,3 +1,3 @@
 ("this is" ;test)
 
-"hello" hello \ - daddy)
+"hello" hello daddy)

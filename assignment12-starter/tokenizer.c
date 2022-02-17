@@ -7,6 +7,7 @@ Last updated 02-14-2022
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "value.h"
 #include "talloc.h"
@@ -36,14 +37,63 @@ int isString(char *str)
 }
 
 /*
+validInitialCharacter()
+*/
+int validInitialCharacter(char c)
+{
+    printf("check: %c\n", c);
+    if (isalpha(c))
+    {
+        return 1;
+    }
+    else if (
+        (c == '!') ||
+        (c == '$') ||
+        (c == '%') ||
+        (c == '&') ||
+        (c == '*') ||
+        (c == '/') ||
+        (c == ':') ||
+        (c == '<') ||
+        (c == '=') ||
+        (c == '>') ||
+        (c == '?') ||
+        (c == '~') ||
+        (c == '_') ||
+        (c == '^'))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+/*
 validSymbol(char* s)
 helper function to check for malformatted symbols
-multi-char symbol cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^
+multi-char symbol can ONLY contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^|LETTER|NUMBER
 single-char symbols cannot be a number
+
+<identifier> ->  <initial> <subsequent>* | + | -
+<initial>    ->  <letter> | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^
+<subsequent> ->  <initial> | <digit> | . | + | -
+<letter>     ->  a | b | ... | z | A | B | ... | Z
+<digit>      ->  0 | 1 | ... | 9
 */
 int validSymbol(char *s)
 {
-    return 1;
+    printf("check this too: %s\n", s);
+    // check that initial is of a valid character
+    if (validInitialCharacter(s[0]))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 Value *tokenize()
@@ -125,12 +175,21 @@ Value *tokenize()
 
             // need to set to the next character right away else the check for terminating double quotes won't work
             next_char = (char)fgetc(stdin);
-            while (next_char != EOF && 1)
+            while (next_char != EOF)
             {
                 // well formed string, make string literal
                 if (next_char == '"')
                 {
-                    break;
+                    // check for an edge case where there's a string in format ("hello"world)
+                    char temporary = (char)fgetc(stdin);
+                    if (temporary == ' ')
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        assert(1 == 0 && "TokenizeError: malformatted string literals, double quotes not supported");
+                    }
                 }
                 else
                 {
@@ -220,10 +279,10 @@ Value *tokenize()
 
             temp_symbol[strlen(temp_symbol)] = next_char;
         }
-
         next_char = (char)fgetc(stdin);
     }
 
+    free(temp_symbol);
     // Reverse the tokens list, to put it back in order
     Value *reversed_list = reverse(tokens_list);
 
@@ -259,4 +318,5 @@ void displayTokens(Value *list)
         }
         current = cdr(current);
     }
+    validInitialCharacter('!');
 }
