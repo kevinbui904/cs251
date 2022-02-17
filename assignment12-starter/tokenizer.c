@@ -41,7 +41,7 @@ validInitialCharacter()
 */
 int validInitialCharacter(char c)
 {
-    printf("check: %c\n", c);
+    printf("check validInitialChar: %c\n", c);
     if (isalpha(c))
     {
         return 1;
@@ -61,6 +61,7 @@ int validInitialCharacter(char c)
         (c == '~') ||
         (c == '_') ||
         (c == '^'))
+
     {
         return 1;
     }
@@ -68,6 +69,39 @@ int validInitialCharacter(char c)
     {
         return 0;
     }
+}
+
+/*
+validSubsequentCharacters()
+*/
+int validSubsequentCharacters(char *s)
+{
+    for (int i = 0; i < strlen(s); i++)
+    {
+        if (isalpha(s[i]) ||
+            isdigit(s[i]) ||
+            (s[i] == '!') ||
+            (s[i] == '$') ||
+            (s[i] == '%') ||
+            (s[i] == '&') ||
+            (s[i] == '*') ||
+            (s[i] == '/') ||
+            (s[i] == ':') ||
+            (s[i] == '<') ||
+            (s[i] == '=') ||
+            (s[i] == '>') ||
+            (s[i] == '?') ||
+            (s[i] == '~') ||
+            (s[i] == '_') ||
+            (s[i] == '^') ||
+            (s[i] == '.') ||
+            (s[i] == '+') ||
+            (s[i] == '-'))
+        {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /*
@@ -86,7 +120,7 @@ int validSymbol(char *s)
 {
     printf("check this too: %s\n", s);
     // check that initial is of a valid character
-    if (validInitialCharacter(s[0]))
+    if (validInitialCharacter(s[0]) && validSubsequentCharacters(s))
     {
         return 1;
     }
@@ -107,7 +141,7 @@ Value *tokenize()
     next_char = (char)fgetc(stdin);
 
     // used to store temporary strings
-    char *temp_symbol = malloc(sizeof(char) * 300);
+    char *temp_symbol = talloc(sizeof(char) * 300);
 
     // Start tokenizing!
     while (next_char != EOF)
@@ -119,6 +153,11 @@ Value *tokenize()
         Value *new_cons_cell = talloc(sizeof(Value));
         new_cons_cell->type = CONS_TYPE;
 
+        // go to the first non space
+        while (next_char == ' ')
+        {
+            next_char = (char)fgetc(stdin);
+        }
         // make closings
         if (next_char == '(')
         {
@@ -133,21 +172,18 @@ Value *tokenize()
             // if temp_symbol is not freed (no space before closing is allowed)
             if (strlen(temp_symbol) > 0)
             {
+                printf("check here_: %s, %lu", temp_symbol, strlen(temp_symbol));
+
                 if (validSymbol(temp_symbol))
                 {
                     new_token->type = SYMBOL_TYPE;
 
-                    char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
-                    for (int i = 0; i < strlen(temp_symbol); i++)
-                    {
-                        copy[i] = temp_symbol[i];
-                    }
-                    new_token->s = copy;
+                    new_token->s = temp_symbol;
 
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
-                    free(temp_symbol);
-                    temp_symbol = malloc(sizeof(char) * 300);
+
+                    temp_symbol = talloc(sizeof(char) * 300);
 
                     // special case
                     Value *null_token = talloc(sizeof(Value));
@@ -163,6 +199,7 @@ Value *tokenize()
             else
             {
                 new_token->type = CLOSE_TYPE;
+
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
             }
@@ -194,6 +231,7 @@ Value *tokenize()
                 else
                 {
                     temp_symbol[strlen(temp_symbol)] = next_char;
+
                     next_char = (char)fgetc(stdin);
                 }
             }
@@ -204,29 +242,18 @@ Value *tokenize()
             }
             else
             {
-                // copy over string
-                // NOTE: only - 1 because the temp_string DOES NOT include the first double quote
-                char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
-
-                for (int i = 0; i < strlen(temp_symbol); i++)
-                {
-                    copy[i] = temp_symbol[i];
-                }
-
-                // store string (char*) into Value new_string
-
-                free(temp_symbol);
-                temp_symbol = malloc(sizeof(char) * 300);
 
                 new_token->type = STR_TYPE;
-                new_token->s = copy;
+                new_token->s = temp_symbol;
+
+                temp_symbol = talloc(sizeof(char) * 300);
 
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
             }
         }
         // check for empty space (used as delimiter), if hit, just restart the temporary symbol
-        else if (next_char == ' ')
+        else if (next_char == ' ' && (strlen(temp_symbol) > 0))
         {
             // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
             if (validSymbol(temp_symbol))
@@ -236,16 +263,9 @@ Value *tokenize()
                 // copy over the symbol only if the symbol is not empty
                 if (strlen(temp_symbol) > 0)
                 {
-                    char *copy = talloc((sizeof(char)) * strlen(temp_symbol));
-                    for (int i = 0; i < strlen(temp_symbol); i++)
-                    {
-                        copy[i] = temp_symbol[i];
-                    }
-                    new_token->s = copy;
-
+                    new_token->s = temp_symbol;
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
-                    free(temp_symbol);
                     temp_symbol = malloc(sizeof(char) * 300);
                 }
             }
@@ -253,8 +273,6 @@ Value *tokenize()
             {
                 assert(1 == 0 && "TokenizeError: symbol contains a non allowed character");
             }
-
-            // end of line character need to be catched
         }
         // if semicolon is seen, ignore the rest of this line
         else if (next_char == ';')
@@ -272,17 +290,49 @@ Value *tokenize()
                 next_char = (char)fgetc(stdin);
             }
         }
+        // check for booleans
+        else if (next_char == '#')
+        {
+            while (next_char != ' ' && next_char != EOF && next_char != ')')
+            {
+                temp_symbol[strlen(temp_symbol)] = next_char;
+                if (strlen(temp_symbol) > 2)
+                {
+                    assert(1 == 0 && "TokenizeError: boolean value invalid");
+                }
+                next_char = (char)fgetc(stdin);
+            }
+            if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
+            {
+                new_token->type = BOOL_TYPE;
+                new_token->s = temp_symbol;
+                new_token->i = 1;
+                new_cons_cell = cons(new_token, tokens_list);
+                tokens_list = new_cons_cell;
+                temp_symbol = malloc(sizeof(char) * 300);
+            }
+            else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
+            {
+                new_token->type = BOOL_TYPE;
+                new_token->s = temp_symbol;
+                new_token->i = 0;
+                new_cons_cell = cons(new_token, tokens_list);
+                tokens_list = new_cons_cell;
+                temp_symbol = malloc(sizeof(char) * 300);
+            }
+            else
+            {
+                assert(1 == 0 && "TokenizeError: invalid boolean value");
+            }
+        }
         // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
         else
         {
-            // assignment specificity, all strings will only be 300 characters long
-
             temp_symbol[strlen(temp_symbol)] = next_char;
         }
         next_char = (char)fgetc(stdin);
     }
 
-    free(temp_symbol);
     // Reverse the tokens list, to put it back in order
     Value *reversed_list = reverse(tokens_list);
 
@@ -312,6 +362,20 @@ void displayTokens(Value *list)
             break;
         case SYMBOL_TYPE:
             printf("%s:symbol\n", car(current)->s);
+            break;
+        case BOOL_TYPE:
+            if (car(current)->i == 1)
+            {
+                printf("#t:boolean\n");
+            }
+            else if (car(current)->i == 0)
+            {
+                printf("#f:boolean\n");
+            }
+            else
+            {
+                assert(1 == 0 && "TokenizerError: invalid boolean print");
+            }
             break;
         default:
             printf("not yet implemented\n");

@@ -1,3 +1,1 @@
-("this is" ;test)
-
-"hello" hello daddy)
+( ) #t #f "string" x y z ;;comment 3
