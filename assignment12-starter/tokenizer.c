@@ -1,7 +1,7 @@
 /*
 tokenizer2.c
 Written by Victor Huang and Thien K. M. Bui
-Last updated 02-17-2022
+Last updated 02-18-2022
 */
 
 #include <stdio.h>
@@ -186,6 +186,36 @@ int validNumber(char *s)
         return 0;
     }
 }
+
+/*
+notDelimiter()
+return 1 if char is not ' ', ')', '\n', '\r', ';', EOF,
+0 otherwise
+*/
+int notDelimiter(char c)
+{
+    // if (next_char != ' ' && next_char != ')' && next_char != '\n' && next_char != ';' && next_char != EOF)
+    switch (c)
+    {
+    case ' ':
+        return 0;
+        break;
+    case ')':
+        return 0;
+        break;
+    case '\n':
+        return 0;
+    case '\r':
+        return 0;
+    case ';':
+        return 0;
+    case EOF:
+        return 0;
+    default:
+        return 1;
+    }
+}
+
 Value *tokenize()
 {
 
@@ -227,8 +257,7 @@ Value *tokenize()
         else if (next_char == ';')
         {
             while (next_char != '\n' && next_char != EOF)
-            {  
-                
+            {
                 next_char = (char)fgetc(stdin);
             }
         }
@@ -253,7 +282,7 @@ Value *tokenize()
             if (next_char == '#')
             {
                 char temp_boolean[300] = {'\0'};
-                while (next_char != ' ' && next_char != EOF && next_char != ')')
+                while (notDelimiter(next_char))
                 {
                     // check with james, how to handle this case (building out the temp string)
                     temp_boolean[strlen(temp_boolean)] = next_char;
@@ -328,7 +357,7 @@ Value *tokenize()
             {
                 // build out a new symbol
                 char temp_symbol[300] = {'\0'};
-                while (next_char != ' ' && next_char !=')' && next_char != '\n' && next_char != ';')
+                while (notDelimiter(next_char))
                 {
                     temp_symbol[strlen(temp_symbol)] = next_char;
                     next_char = (char)fgetc(stdin);
@@ -341,7 +370,7 @@ Value *tokenize()
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
                 }
-                //case for double
+                // case for double
                 else if (validNumber(temp_symbol) == 2)
                 {
                     new_token->type = DOUBLE_TYPE;
@@ -358,7 +387,7 @@ Value *tokenize()
                         {
                             new_token->type = SYMBOL_TYPE;
                             // store temp_symbole
-                            char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char)+1);
+                            char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char) + 1);
                             strcpy(stored_symbol, temp_symbol);
                             new_token->s = stored_symbol;
                             new_cons_cell = cons(new_token, tokens_list);
@@ -367,7 +396,7 @@ Value *tokenize()
                     }
                     else
                     {
-                        printf("TokenizeError ('[empty]'): symbol == %s == contains a non allowed character\n", temp_symbol);
+                        printf("Syntax error (readSymbol): symbol %s does not start with an allowed first character.\n", temp_symbol);
                         texit(1);
                     }
                 }
