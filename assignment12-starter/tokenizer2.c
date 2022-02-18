@@ -332,15 +332,12 @@ Value *tokenize()
             else
             {
                 // build out a new symbol
-                char temp_symbol[300];
-                temp_symbol[0] = '\0';
-                while (next_char != ' ')
+                char temp_symbol[300] = {'\0'};
+                while (next_char != ' ' && next_char != '\n' && next_char != ')')
                 {
                     temp_symbol[strlen(temp_symbol)] = next_char;
                     next_char = (char)fgetc(stdin);
                 }
-                // add null terminator at the end of temp_symbol
-                temp_symbol[strlen(temp_symbol)] = '\0';
 
                 if (validNumber(temp_symbol) == 1)
                 {

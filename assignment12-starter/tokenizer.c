@@ -1,5 +1,5 @@
 /*
-tokenizer.c
+tokenizer2.c
 Written by Victor Huang and Thien K. M. Bui
 Last updated 02-17-2022
 */
@@ -18,7 +18,7 @@ Last updated 02-17-2022
 // a Value struct of type INT_TYPE, with an integer value stored in struct variable i.
 // See the assignment instructions for more details.
 
-/*isString()
+/*isString()a
 helper function
 return 0 if false, 1 if true
 */
@@ -196,9 +196,6 @@ Value *tokenize()
     char next_char;
     next_char = (char)fgetc(stdin);
 
-    // used to store temporary strings
-    char *temp_symbol = talloc(sizeof(char) * 300);
-    temp_symbol[0] = '\0';
     // Start tokenizing!
     while (next_char != EOF)
     {
@@ -214,265 +211,167 @@ Value *tokenize()
             new_token->type = OPEN_TYPE;
             new_cons_cell = cons(new_token, tokens_list);
             tokens_list = new_cons_cell;
+            next_char = (char)fgetc(stdin);
         }
         // need to account for end condition in if () there no space before last )
         else if (next_char == ')')
         {
-            // if temp_symbol is not freed (no space before closing is allowed)
-            if (strlen(temp_symbol) > 0)
-            {
-                // check if valid number (see grammar up top)
-                if (validNumber(temp_symbol) == 1)
-                {
-                    new_token->type = INT_TYPE;
-                    new_token->i = strtol(temp_symbol, NULL, 10);
-                    new_cons_cell = cons(new_token, tokens_list);
-                    tokens_list = new_cons_cell;
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
-                }
-                else if (validNumber(temp_symbol) == 2)
-                {
-                    new_token->type = DOUBLE_TYPE;
-                    new_token->d = strtod(temp_symbol, NULL);
-                    new_cons_cell = cons(new_token, tokens_list);
-                    tokens_list = new_cons_cell;
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
-                }
-                else if (validSymbol(temp_symbol))
-                {
-                    new_token->type = SYMBOL_TYPE;
+            new_token->type = CLOSE_TYPE;
 
-                    new_token->s = temp_symbol;
-
-                    new_cons_cell = cons(new_token, tokens_list);
-                    tokens_list = new_cons_cell;
-
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
-                }
-                else
-                {
-                    printf("TokenizeError: symbol contains a non allowed character\n");
-                    exit(1);
-                }
-                // special case
-                Value *null_token = talloc(sizeof(Value));
-                null_token->type = CLOSE_TYPE;
-                new_cons_cell = cons(null_token, tokens_list);
-                tokens_list = new_cons_cell;
-            }
-            else
-            {
-                new_token->type = CLOSE_TYPE;
-
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-            }
-        }
-
-        // check for string (special else if (next_char ==since double quotes are not to be used as a symbol)
-        else if (next_char == '"')
-        {
-            // if it's a malformed string (mismatched double quotes), throw an error
-
-            // need to set to the next character right away else the check for terminating double quotes won't work
+            new_cons_cell = cons(new_token, tokens_list);
+            tokens_list = new_cons_cell;
             next_char = (char)fgetc(stdin);
-            while (next_char != EOF)
-            {
-                // well formed string, make string literal
-                if (next_char == '"')
-                {
-                    // check for an edge case where there's a string in format ("hello"world)
-                    char temporary = (char)fgetc(stdin);
-                    if (temporary == ' ')
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        printf("TokenizeError: malformatted string literals, double quotes not supported\n");
-                        exit(1);
-                    }
-                }
-                else
-                {
-                    temp_symbol[strlen(temp_symbol)] = next_char;
-
-                    next_char = (char)fgetc(stdin);
-                }
-            }
-            // if malformed string just throw error
-            if (next_char == EOF)
-            {
-                printf("TokenizeError: malformatted string literals\n");
-                exit(1);
-            }
-            else
-            {
-
-                // add terminating character
-                temp_symbol[strlen(temp_symbol)] = '\0';
-
-                new_token->type = STR_TYPE;
-                new_token->s = temp_symbol;
-
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
-
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-            }
         }
-        // check for empty space (used as delimiter), if hit, just restart the temporary symbol
-        else if (next_char == ' ' && (strlen(temp_symbol) > 0))
-        {
 
-            // add terminating character
-            temp_symbol[strlen(temp_symbol)] = '\0';
-            // check if valid number (see grammar up top)
-            if (validNumber(temp_symbol) == 1)
-            {
-                new_token->type = INT_TYPE;
-                new_token->i = strtol(temp_symbol, NULL, 10);
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
-            }
-            else if (validNumber(temp_symbol) == 2)
-            {
-                new_token->type = DOUBLE_TYPE;
-                new_token->d = strtod(temp_symbol, NULL);
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
-            }
-            else // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
-                if (validSymbol(temp_symbol))
-                {
-                    // copy over the symbol only if the symbol is not empty
-                    if (strlen(temp_symbol) > 0)
-                    {
-                        new_token->type = SYMBOL_TYPE;
-                        new_token->s = temp_symbol;
-                        new_cons_cell = cons(new_token, tokens_list);
-                        tokens_list = new_cons_cell;
-                        temp_symbol = talloc(sizeof(char) * 300);
-                        temp_symbol[0] = '\0';
-                    }
-                }
-                else
-                {
-                    printf("TokenizeError: symbol contains a non allowed character\n");
-                    exit(1);
-                }
-        }
         // if semicolon is seen, ignore the rest of this line
         else if (next_char == ';')
         {
             while (next_char != '\n' && next_char != EOF)
-            {
+            {  
+                
                 next_char = (char)fgetc(stdin);
             }
         }
         // ignore newline characters
         else if (next_char == '\n')
         {
-            while (next_char != '\n' && next_char != EOF)
+            while (next_char == '\n')
             {
                 next_char = (char)fgetc(stdin);
             }
         }
-        // check for booleans
-        else if (next_char == '#')
+        else if (next_char == ' ')
         {
-            while (next_char != ' ' && next_char != EOF && next_char != ')')
+            while (next_char == ' ')
             {
-                temp_symbol[strlen(temp_symbol)] = next_char;
-                if (strlen(temp_symbol) > 2)
-                {
-                    printf("Syntax error (readBoolean): boolean was not #t or #f\n");
-                    exit(1);
-                }
                 next_char = (char)fgetc(stdin);
             }
-            if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
+        }
+        else
+        {
+            // handle boolean
+            if (next_char == '#')
             {
-                new_token->type = BOOL_TYPE;
-                new_token->s = temp_symbol;
-                new_token->i = 1;
+                char temp_boolean[300] = {'\0'};
+                while (next_char != ' ' && next_char != EOF && next_char != ')')
+                {
+                    // check with james, how to handle this case (building out the temp string)
+                    temp_boolean[strlen(temp_boolean)] = next_char;
+                    if (strlen(temp_boolean) > 2)
+                    {
+
+                        printf("Syntax error (readBoolean): boolean was not #t or #f\n");
+                        texit(1);
+                    }
+                    next_char = (char)fgetc(stdin);
+                }
+                if (temp_boolean[1] == 't' || temp_boolean[1] == 'T')
+                {
+                    new_token->type = BOOL_TYPE;
+                    new_token->i = 1;
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                }
+                else if (temp_boolean[1] == 'f' || temp_boolean[1] == 'F')
+                {
+                    new_token->type = BOOL_TYPE;
+                    new_token->i = 0;
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                }
+                else
+                {
+                    printf("Syntax error (readBoolean): boolean ==%s== was not #t or #f\n", temp_boolean);
+                    texit(1);
+                }
+            }
+            // handle strings
+            else if (next_char == '\"')
+            {
+                char temp_string[300] = {'\0'};
+                next_char = (char)fgetc(stdin);
+                while (next_char != EOF)
+                {
+                    // well formed string, make string literal
+                    if (next_char == '\"')
+                    {
+                        // check for an edge case where there's a string in format ("hello"world)
+                        next_char = (char)fgetc(stdin);
+
+                        if (next_char == ' ' || next_char == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            printf("TokenizeError: malformatted string literals, double quotes not supported\n");
+                            texit(1);
+                        }
+                    }
+                    else
+                    {
+                        temp_string[strlen(temp_string)] = next_char;
+
+                        next_char = (char)fgetc(stdin);
+                    }
+                }
+                // if string is well formed
+                new_token->type = STR_TYPE;
+                char *stored_string = talloc(sizeof(char) * strlen(temp_string) + 1);
+                strcpy(stored_string, temp_string);
+                new_token->s = stored_string;
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
             }
-            else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
-            {
-                new_token->type = BOOL_TYPE;
-                new_token->s = temp_symbol;
-                new_token->i = 0;
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
-            }
+            // handle symbols
             else
             {
-                printf("Syntax error (readBoolean): boolean was not #t or #f\n");
-                exit(1);
-            }
-        }
-        // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
-        else
-        {
-            if (next_char != ' ')
-            {
-                temp_symbol[strlen(temp_symbol)] = next_char;
-            }
-        }
-        next_char = (char)fgetc(stdin);
-    }
-    if (strlen(temp_symbol) > 0)
-    {
-        Value *new_token = talloc(sizeof(Value));
-        Value *new_cons_cell = talloc(sizeof(Value));
-        // add terminating character
-        temp_symbol[strlen(temp_symbol)] = '\0';
-        // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
+                // build out a new symbol
+                char temp_symbol[300] = {'\0'};
+                while (next_char != ' ' && next_char !=')' && next_char != '\n' && next_char != ';')
+                {
+                    temp_symbol[strlen(temp_symbol)] = next_char;
+                    next_char = (char)fgetc(stdin);
+                }
 
-        // check if valid number (see grammar up top)
-        if (validNumber(temp_symbol) == 1)
-        {
-            new_token->type = INT_TYPE;
-            new_token->i = strtol(temp_symbol, NULL, 10);
-            new_cons_cell = cons(new_token, tokens_list);
-            tokens_list = new_cons_cell;
-        }
-        else if (validNumber(temp_symbol) == 2)
-        {
-            new_token->type = DOUBLE_TYPE;
-            new_token->d = strtod(temp_symbol, NULL);
-            new_cons_cell = cons(new_token, tokens_list);
-            tokens_list = new_cons_cell;
-        }
-        else if (validSymbol(temp_symbol))
-        {
-
-            // copy over the symbol only if the symbol is not empty
-            if (strlen(temp_symbol) > 0)
-            {
-                new_token->type = SYMBOL_TYPE;
-                new_token->s = temp_symbol;
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
+                if (validNumber(temp_symbol) == 1)
+                {
+                    new_token->type = INT_TYPE;
+                    new_token->i = strtol(temp_symbol, NULL, 10);
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                }
+                //case for double
+                else if (validNumber(temp_symbol) == 2)
+                {
+                    new_token->type = DOUBLE_TYPE;
+                    new_token->d = strtod(temp_symbol, NULL);
+                    new_cons_cell = cons(new_token, tokens_list);
+                    tokens_list = new_cons_cell;
+                }
+                else // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
+                {
+                    if (validSymbol(temp_symbol))
+                    {
+                        // copy over the symbol only if the symbol is not empty
+                        if (strlen(temp_symbol) > 0)
+                        {
+                            new_token->type = SYMBOL_TYPE;
+                            // store temp_symbole
+                            char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char)+1);
+                            strcpy(stored_symbol, temp_symbol);
+                            new_token->s = stored_symbol;
+                            new_cons_cell = cons(new_token, tokens_list);
+                            tokens_list = new_cons_cell;
+                        }
+                    }
+                    else
+                    {
+                        printf("TokenizeError ('[empty]'): symbol == %s == contains a non allowed character\n", temp_symbol);
+                        texit(1);
+                    }
+                }
             }
-        }
-        else
-        {
-            printf("Syntax error: %s symbol not supported\n", temp_symbol);
         }
     }
 
@@ -516,7 +415,7 @@ void displayTokens(Value *list)
             else
             {
                 printf("Syntax error (readBoolean): boolean was not #t or #f\n");
-                exit(1);
+                texit(1);
             }
             break;
         case INT_TYPE:
