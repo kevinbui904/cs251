@@ -1,0 +1,1 @@
+All code in talloc.c, linkedlist.c, and tokenizer.c are written by Victor Huang and Thien K. M. Bui. 

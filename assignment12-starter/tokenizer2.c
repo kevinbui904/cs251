@@ -1,5 +1,5 @@
 /*
-tokenizer.c
+tokenizer2.c
 Written by Victor Huang and Thien K. M. Bui
 Last updated 02-17-2022
 */
@@ -197,8 +197,7 @@ Value *tokenize()
     next_char = (char)fgetc(stdin);
 
     // used to store temporary strings
-    char *temp_symbol = talloc(sizeof(char) * 300);
-    temp_symbol[0] = '\0';
+    char temp_symbol[300] = {'\0'};
     // Start tokenizing!
     while (next_char != EOF)
     {
@@ -228,8 +227,7 @@ Value *tokenize()
                     new_token->i = strtol(temp_symbol, NULL, 10);
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
+                    memset(temp_symbol, strlen(temp_symbol), '\0');
                 }
                 else if (validNumber(temp_symbol) == 2)
                 {
@@ -237,20 +235,21 @@ Value *tokenize()
                     new_token->d = strtod(temp_symbol, NULL);
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
+                    memset(temp_symbol, strlen(temp_symbol), '\0');
                 }
                 else if (validSymbol(temp_symbol))
                 {
                     new_token->type = SYMBOL_TYPE;
 
-                    new_token->s = temp_symbol;
+                    // store temp_symbol
+                    char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char));
+                    strcpy(stored_symbol, temp_symbol);
+                    new_token->s = stored_symbol;
 
                     new_cons_cell = cons(new_token, tokens_list);
                     tokens_list = new_cons_cell;
 
-                    temp_symbol = talloc(sizeof(char) * 300);
-                    temp_symbol[0] = '\0';
+                    memset(temp_symbol, strlen(temp_symbol), '\0');
                 }
                 else
                 {
@@ -312,17 +311,15 @@ Value *tokenize()
             else
             {
 
-                // add terminating character
-                temp_symbol[strlen(temp_symbol)] = '\0';
-
+                // store temp symbol
+                char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char));
+                strcpy(stored_symbol, temp_symbol);
+                new_token->s = stored_symbol;
                 new_token->type = STR_TYPE;
-                new_token->s = temp_symbol;
-
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
-
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
+
+                memset(temp_symbol, strlen(temp_symbol), '\0');
             }
         }
         // check for empty space (used as delimiter), if hit, just restart the temporary symbol
@@ -338,8 +335,8 @@ Value *tokenize()
                 new_token->i = strtol(temp_symbol, NULL, 10);
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
+                memset(temp_symbol, strlen(temp_symbol), '\0');
+                ;
             }
             else if (validNumber(temp_symbol) == 2)
             {
@@ -347,8 +344,7 @@ Value *tokenize()
                 new_token->d = strtod(temp_symbol, NULL);
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
+                memset(temp_symbol, strlen(temp_symbol), '\0');
             }
             else // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
                 if (validSymbol(temp_symbol))
@@ -357,11 +353,14 @@ Value *tokenize()
                     if (strlen(temp_symbol) > 0)
                     {
                         new_token->type = SYMBOL_TYPE;
-                        new_token->s = temp_symbol;
+
+                        // store temp_symbole
+                        char *stored_symbol = talloc(strlen(temp_symbol) * sizeof(char));
+                        strcpy(stored_symbol, temp_symbol);
+                        new_token->s = stored_symbol;
                         new_cons_cell = cons(new_token, tokens_list);
                         tokens_list = new_cons_cell;
-                        temp_symbol = talloc(sizeof(char) * 300);
-                        temp_symbol[0] = '\0';
+                        memset(temp_symbol, strlen(temp_symbol), '\0');
                     }
                 }
                 else
@@ -402,22 +401,19 @@ Value *tokenize()
             if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
             {
                 new_token->type = BOOL_TYPE;
-                new_token->s = temp_symbol;
                 new_token->i = 1;
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
+
+                memset(temp_symbol, strlen(temp_symbol), '\0');
             }
             else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
             {
                 new_token->type = BOOL_TYPE;
-                new_token->s = temp_symbol;
                 new_token->i = 0;
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
-                temp_symbol = talloc(sizeof(char) * 300);
-                temp_symbol[0] = '\0';
+                memset(temp_symbol, strlen(temp_symbol), '\0');
             }
             else
             {
@@ -439,9 +435,6 @@ Value *tokenize()
     {
         Value *new_token = talloc(sizeof(Value));
         Value *new_cons_cell = talloc(sizeof(Value));
-        // add terminating character
-        temp_symbol[strlen(temp_symbol)] = '\0';
-        // check valid symbol (cannot contains | ! | $ | % | & | * | / | : | < | = | > | ? | ~ | _ | ^)
 
         // check if valid number (see grammar up top)
         if (validNumber(temp_symbol) == 1)
@@ -465,6 +458,8 @@ Value *tokenize()
             if (strlen(temp_symbol) > 0)
             {
                 new_token->type = SYMBOL_TYPE;
+                char *stored_symbol = talloc(sizeof(char) * strlen(temp_symbol));
+                strcpy(stored_symbol, temp_symbol);
                 new_token->s = temp_symbol;
                 new_cons_cell = cons(new_token, tokens_list);
                 tokens_list = new_cons_cell;
