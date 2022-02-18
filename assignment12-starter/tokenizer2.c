@@ -18,7 +18,7 @@ Last updated 02-17-2022
 // a Value struct of type INT_TYPE, with an integer value stored in struct variable i.
 // See the assignment instructions for more details.
 
-/*isString()
+/*isString()a
 helper function
 return 0 if false, 1 if true
 */
@@ -283,17 +283,20 @@ Value *tokenize()
         // ignore newline characters
         else if (next_char == '\n')
         {
-            while (next_char == '\n' || next_char == ' ')
+            while (next_char == '\n')
             {
                 next_char = (char)fgetc(stdin);
             }
-            temp_symbol[strlen(temp_symbol)] = next_char;
+        }
+        else if (next_char == ' '){
+            while (next_char == ' '){
+                next_char = (char)fgetc(stdin);
+            }
         }
         // check for string (special else if (next_char ==since double quotes are not to be used as a symbol)
         else if (next_char == '"')
         {
             // if it's a malformed string (mismatched double quotes), throw an error
-
             // need to set to the next character right away else the check for terminating double quotes won't work
             next_char = (char)fgetc(stdin);
             while (next_char != EOF)
@@ -385,91 +388,90 @@ Value *tokenize()
                     texit(1);
                 }
         }
-        else if (next_char == '#')
-        {
-            while (next_char != ' ' && next_char != EOF && next_char != ')')
-            {
-                temp_symbol[strlen(temp_symbol)] = next_char;
-                if (strlen(temp_symbol) > 2)
-                {
+        // else if (next_char == '#')
+        // {
+        //     while (next_char != ' ' && next_char != EOF && next_char != ')')
+        //     {
+        //         temp_symbol[strlen(temp_symbol)] = next_char;
+        //         if (strlen(temp_symbol) > 2)
+        //         {
 
-                    printf("Syntax error (readBoolean): boolean was not #t or #f\n");
-                    texit(1);
-                }
-                next_char = (char)fgetc(stdin);
-            }
-            if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
-            {
-                new_token->type = BOOL_TYPE;
-                new_token->i = 1;
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-                memset(temp_symbol, '\0', strlen(temp_symbol));
-            }
-            else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
-            {
-                new_token->type = BOOL_TYPE;
-                new_token->i = 0;
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-                memset(temp_symbol, '\0', strlen(temp_symbol));
-            }
-            else
-            {
+        //             printf("Syntax error (readBoolean): boolean was not #t or #f\n");
+        //             texit(1);
+        //         }
+        //         next_char = (char)fgetc(stdin);
+        //     }
+        //     if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
+        //     {
+        //         new_token->type = BOOL_TYPE;
+        //         new_token->i = 1;
+        //         new_cons_cell = cons(new_token, tokens_list);
+        //         tokens_list = new_cons_cell;
+        //         memset(temp_symbol, '\0', strlen(temp_symbol));
+        //     }
+        //     else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
+        //     {
+        //         new_token->type = BOOL_TYPE;
+        //         new_token->i = 0;
+        //         new_cons_cell = cons(new_token, tokens_list);
+        //         tokens_list = new_cons_cell;
+        //         memset(temp_symbol, '\0', strlen(temp_symbol));
+        //     }
+        //     else
+        //     {
 
-                printf("Syntax error (readBoolean): boolean was not #t or #f\n");
-                texit(1);
-            }
-        }
+        //         printf("Syntax error (readBoolean): boolean was not #t or #f\n");
+        //         texit(1);
+        //     }
+        // }
         // by default, concatenate ALL char into a long string, concatenation stops upon first encounter wtih a whitespace character
         else
         {
-            if (next_char != ' ')
+            //handle boolean
+            if(next_char = '#')
             {
-                temp_symbol[strlen(temp_symbol)] = next_char;
+                while (next_char != ' ' && next_char != EOF && next_char != ')')
+                {
+                    //check with james, how to handle this case (building out the temp string)
+                    char *store_boolean = talloc(sizeof(char) * 300);
+                    store_boolean[0] = '\0';
+                    store_boolean[strlen(store_boolean)] = next_char;
+                    if (strlen(temp_symbol) > 2)
+                    {
+
+                        printf("Syntax error (readBoolean): boolean was not #t or #f\n");
+                        texit(1);
+                    }
+                    
+                    else{
+                        if (temp_symbol[1] == 't' || temp_symbol[1] == 'T')
+                        {
+                            new_token->type = BOOL_TYPE;
+                            new_token->i = 1;
+                            new_cons_cell = cons(new_token, tokens_list);
+                            tokens_list = new_cons_cell;
+                            memset(temp_symbol, '\0', strlen(temp_symbol));
+                        }
+                        else if (temp_symbol[1] == 'f' || temp_symbol[1] == 'F')
+                        {
+                            new_token->type = BOOL_TYPE;
+                            new_token->i = 0;
+                            new_cons_cell = cons(new_token, tokens_list);
+                            tokens_list = new_cons_cell;
+                            memset(temp_symbol, '\0', strlen(temp_symbol));
+                        }
+                        else
+                        {
+
+                            printf("Syntax error (readBoolean): boolean was not #t or #f\n");
+                            texit(1);
+                        }
+                    }
+
+                }   
+            //handle symbols
             }
-        }
-        next_char = (char)fgetc(stdin);
-    }
-    if (strlen(temp_symbol) > 0)
-    {
-        Value *new_token = talloc(sizeof(Value));
-        Value *new_cons_cell = talloc(sizeof(Value));
-
-        // check if valid number (see grammar up top)
-        if (validNumber(temp_symbol) == 1)
-        {
-            new_token->type = INT_TYPE;
-            new_token->i = strtol(temp_symbol, NULL, 10);
-            new_cons_cell = cons(new_token, tokens_list);
-            tokens_list = new_cons_cell;
-        }
-        else if (validNumber(temp_symbol) == 2)
-        {
-            new_token->type = DOUBLE_TYPE;
-            new_token->d = strtod(temp_symbol, NULL);
-            new_cons_cell = cons(new_token, tokens_list);
-            tokens_list = new_cons_cell;
-        }
-        else if (validSymbol(temp_symbol))
-        {
-
-            // copy over the symbol only if the symbol is not empty
-            if (strlen(temp_symbol) > 0)
-            {
-                new_token->type = SYMBOL_TYPE;
-                char *stored_symbol = talloc(sizeof(char) * strlen(temp_symbol));
-                strcpy(stored_symbol, temp_symbol);
-                new_token->s = temp_symbol;
-                new_cons_cell = cons(new_token, tokens_list);
-                tokens_list = new_cons_cell;
-            }
-        }
-        else
-        {
-
-            printf("Syntax error: %s symbol not supported\n", temp_symbol);
-            texit(1);
+   
         }
     }
 
