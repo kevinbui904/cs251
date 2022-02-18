@@ -1,1 +1,3 @@
-((if (= (- 3 -2.3) 1) + -) 7 9)
+;;basic test case for all types
+
+( ) #t #f 1 0 -1 "string" 1.01 x y z ;;comment 3
