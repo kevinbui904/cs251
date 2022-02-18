@@ -1,1 +1,1 @@
-All code in talloc.c, linkedlist.c, and tokenizer.c are written by Victor Huang and Thien K. M. Bui. 
+All code in talloc.c, linkedlist.c, and tokenizer.c are written by Victor Huang and Thien K. M. Bui. We did received a lot of help from Prof James Ryan and prefect Thomas Zheng though. They're real g's
