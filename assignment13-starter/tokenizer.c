@@ -326,7 +326,7 @@ Value *tokenize()
                         // check for an edge case where there's a string in format ("hello"world)
                         next_char = (char)fgetc(stdin);
 
-                        if (next_char == ' ' || next_char == ')')
+                        if (!notDelimiter(next_char))
                         {
                             break;
                         }

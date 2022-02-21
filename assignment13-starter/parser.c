@@ -18,7 +18,6 @@ Last editted 02-19-22
 Value *parse(Value *tokens)
 {
     // create a temporary linked-stack on the parse() memory stack
-
     Value *parse_tree = makeNull();
 
     Value *current_node = tokens;
@@ -31,7 +30,6 @@ Value *parse(Value *tokens)
     }
     else
     {
-        displayTokens(current_node);
         while (current_node->type != NULL_TYPE)
         {
             Value *current_token = car(current_node);
@@ -39,6 +37,10 @@ Value *parse(Value *tokens)
             // start popping from the type
             if (current_token->type == CLOSE_TYPE)
             {
+                if(depth == 0){
+                    printf("Syntax error: too many close parens\n");
+                    texit(1);
+                }
                 Value *current_right_most = makeNull();
                 // pop UNTIL an open parenthesis is detected
                 // ignore the parenthesis
@@ -49,16 +51,9 @@ Value *parse(Value *tokens)
                 }
                 if (car(parse_tree)->type == OPEN_TYPE)
                 {
-                    if (cdr(parse_tree)->type != NULL_TYPE)
-                    {
-                        parse_tree = cdr(parse_tree);
-                        parse_tree = cons(car(parse_tree), current_right_most);
-                    }
-
-                    else
-                    {
-                        parse_tree = cons(car(cdr(parse_tree)), cons(current_right_most, makeNull()));
-                    }
+                 
+                    parse_tree = cons(current_right_most, cdr(parse_tree));
+                    
                     depth = depth - 1;
                 }
             }
@@ -75,11 +70,13 @@ Value *parse(Value *tokens)
             current_node = cdr(current_node);
         }
     }
-    printf("depth: %i", depth);
+
+    //stack is the parse tree in reverse
+    parse_tree = reverse(parse_tree);
     if (depth != 0)
     {
         // displayTokens(stack);
-        printf("Parse error: missing closing parenthesis\n");
+        printf("Syntax error (depth %i): missing closing parenthesis\n", depth);
         texit(1);
         return parse_tree;
     }
@@ -99,7 +96,7 @@ void printTree(Value *tree)
         switch (tree->type)
         {
         case STR_TYPE:
-            printf("\"%s\"", tree->s);
+            printf("\"%s\" ", tree->s);
             break;
         case SYMBOL_TYPE:
             printf("%s ", tree->s);
@@ -120,18 +117,18 @@ void printTree(Value *tree)
             }
             break;
         case INT_TYPE:
-            printf("%i", tree->i);
+            printf("%i ", tree->i);
             break;
         case DOUBLE_TYPE:
-            printf("%f", tree->d);
+            printf("%f ", tree->d);
             break;
         case CONS_TYPE:
             if (car(tree)->type == CONS_TYPE)
             {
                 printf("( ");
                 printTree(car(tree));
+                printf(") ");
                 printTree(cdr(tree));
-                printf(")");
             }
             else
             {
@@ -141,7 +138,7 @@ void printTree(Value *tree)
 
             break;
         default:
-            printf("ParseError: read type not supported\n");
+            printf("Syntax Error: read type not supported\n");
             texit(1);
         }
     }

@@ -1,7 +1,7 @@
 /*
 tokenizer2.c
 Written by Victor Huang and Thien K. M. Bui
-Last updated 02-18-2022
+Last updated 02-20-2022
 */
 
 #include <stdio.h>
@@ -327,7 +327,7 @@ Value *tokenize()
                         // check for an edge case where there's a string in format ("hello"world)
                         next_char = (char)fgetc(stdin);
 
-                        if (next_char == ' ' || next_char == ')')
+                        if (!notDelimiter(next_char))
                         {
                             break;
                         }
