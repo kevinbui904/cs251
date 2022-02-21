@@ -1,7 +1,7 @@
 /*
 parser.c
 Written by Thien K. M. Bui
-Last editted 02-19-22
+Last editted 02-20-22
 */
 
 #include <stdio.h>
@@ -37,7 +37,8 @@ Value *parse(Value *tokens)
             // start popping from the type
             if (current_token->type == CLOSE_TYPE)
             {
-                if(depth == 0){
+                if (depth == 0)
+                {
                     printf("Syntax error: too many close parens\n");
                     texit(1);
                 }
@@ -51,9 +52,10 @@ Value *parse(Value *tokens)
                 }
                 if (car(parse_tree)->type == OPEN_TYPE)
                 {
-                 
+                    // handle the case where there's nothing between open and close param
+
                     parse_tree = cons(current_right_most, cdr(parse_tree));
-                    
+
                     depth = depth - 1;
                 }
             }
@@ -71,7 +73,7 @@ Value *parse(Value *tokens)
         }
     }
 
-    //stack is the parse tree in reverse
+    // stack is the parse tree in reverse
     parse_tree = reverse(parse_tree);
     if (depth != 0)
     {
@@ -127,6 +129,12 @@ void printTree(Value *tree)
             {
                 printf("( ");
                 printTree(car(tree));
+                printf(") ");
+                printTree(cdr(tree));
+            }
+            else if (car(tree)->type == NULL_TYPE)
+            {
+                printf("(");
                 printf(") ");
                 printTree(cdr(tree));
             }

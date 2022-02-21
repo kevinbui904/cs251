@@ -1,0 +1,1 @@
+All codes written in tokenizer.c, talloc.c, and linkedlist.c are written by Victor Huang and Thien K. M. Bui. Codes in parser.c are written by Thien K. M. Bui with help from prefect Thomas Zheng
