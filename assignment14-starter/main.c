@@ -6,12 +6,11 @@
 #include "talloc.h"
 #include "interpreter.h"
 
-int main() {
-
+int main()
+{
     Value *tokensList = tokenize();
     Value *tree = parse(tokensList);
     interpret(tree);
-
     tfree();
     return 0;
 }

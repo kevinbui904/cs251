@@ -5,9 +5,8 @@
 #include "parser.h"
 #include "talloc.h"
 
-
-int main() {
-
+int main()
+{
     Value *tokensList = tokenize();
     Value *parseTree = parse(tokensList);
 
@@ -17,4 +16,3 @@ int main() {
     tfree();
     return 0;
 }
-
