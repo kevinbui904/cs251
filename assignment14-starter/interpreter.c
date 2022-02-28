@@ -13,7 +13,6 @@ Last editted 02-23-22
 
 Value *eval(Value *expr, Frame *frame)
 {
-    printf("here: %i, %i\n", expr->type, expr->i);
     switch (expr->type)
     {
     case SYMBOL_TYPE:
@@ -47,7 +46,7 @@ Value *eval(Value *expr, Frame *frame)
                     texit(1);
                     return makeNull();
                 }
-            active_frame = active_frame->parent;
+                active_frame = active_frame->parent;
             }
         }
         printf("Syntax error: symbol %s not defined\n", expr->s);
@@ -56,22 +55,22 @@ Value *eval(Value *expr, Frame *frame)
         // return lookUpSymbol(expr, frame);
         break;
     }
-    //should happens when there is a new sub-level (set of parenthesis)
+    // should happens when there is a new sub-level (set of parenthesis)
     case CONS_TYPE:
     {
-        printf("check this here\n");
         Value *first = car(expr);
         Value *args = cdr(expr);
 
         // if first is "if"
-        if (strcmp(first->s, "if"))
+        if (strcmp(first->s, "if") == 0)
         {
             // Frame *result = evalIf(args, frame);
         }
-        else if (strcmp(first->s, "let"))
+        // strcmp returns 0 if the 2 strings matches
+        else if (strcmp(first->s, "let") == 0)
         {
             Frame *active_frame;
-            active_frame->parent = frame; 
+            active_frame->parent = frame;
             active_frame->bindings = makeNull();
 
             Value *current_arg = car(args);
@@ -79,17 +78,21 @@ Value *eval(Value *expr, Frame *frame)
             // evalLet (assign all the symbols to their values and push onto the Frame stack)
             while (!isNull(current_arg))
             {
+                printf("inside while: %i\n", current_arg->type);
                 // iterate through ALL binding pairs
                 if (current_arg->type == CONS_TYPE)
                 {
+                    Value *current_binding = car(current_arg);
+                    Value *symbol = car(current_binding);
                     // valid symbol
-                    if (car(current_arg)->type == SYMBOL_TYPE)
+                    printf("check symbol: %i,%s\n", symbol->type, symbol->s);
+
+                    if (symbol->type == SYMBOL_TYPE)
                     {
                         // binding i in list of bindings
-                        Value *symbol = car(current_arg);
-                        Value *value = cdr(current_arg);
-
-                        if (!isNull((cdr(value))))
+                        Value *value = car(cdr(current_binding));
+                        printf("check value: %i, %i\n", value->type, value->i);
+                        if (!isNull(cdr(cdr(current_binding))))
                         {
                             printf("Syntax Error in (let): too many arguments\n");
                             texit(1);
@@ -97,8 +100,9 @@ Value *eval(Value *expr, Frame *frame)
                         // add bindings to the frame
                         else
                         {
-                            //apply eval to the value
-                            value = eval(value, active_frame);
+                            // apply eval to the value
+                            Value *eval_result = eval(value, active_frame);
+                            printf("eval_result: %i\n", eval_result->type);
                             active_frame->bindings = cons(cons(symbol, value), active_frame->bindings);
                         }
                     }
@@ -118,6 +122,7 @@ Value *eval(Value *expr, Frame *frame)
             }
 
             Value *body = cdr(args);
+            printf("body: %i\n", body->type);
             return eval(body, active_frame);
         }
         // Other special forms go here...
@@ -132,7 +137,7 @@ Value *eval(Value *expr, Frame *frame)
     }
     default:
     {
-        printf("hits here\n");
+        // printf("hits here\n");
         return expr;
     }
     }
@@ -144,33 +149,16 @@ call eval() on EVERY top-level node
 */
 void interpret(Value *tree)
 {
-    Value *current_top_level = tree;
 
-    while (!isNull(current_top_level))
+    while (!isNull(tree))
     {
         // make empty Frame
         Frame *empty_frame;
         empty_frame->bindings = makeNull();
         empty_frame->parent = NULL;
 
-        Value *eval_result = eval(car(current_top_level), empty_frame);
+        Value *eval_result = eval(car(tree), empty_frame);
 
-        // if (eval_result->type == INT_TYPE)
-        // {
-        //     printf("god bless\n");
-        // }
-        // else if (eval_result->type == CONS_TYPE)
-        // {
-        //     printf("interesting\n");
-        // }
-        // else if (eval_result->type == NULL_TYPE)
-        // {
-        //     printf("what\n");
-        // }
-        // else
-        // {
-        //     printf("Something is very wrong")
-        // }
-        current_top_level = cdr(current_top_level);
+        tree = cdr(tree);
     }
 }
