@@ -13,16 +13,18 @@ Last editted 02-23-22
 
 Value *eval(Value *expr, Frame *frame)
 {
+    printf("here: %i, %i\n", expr->type, expr->i);
     switch (expr->type)
     {
     case SYMBOL_TYPE:
     {
-        // iterate through all parents frame and look for symbol
-        Frame *current_frame = frame;
-        while (current_frame != NULL)
+        printf("check this\n");
+        // iterate through all parents frame and look for symbol (this is lookup symbol)
+        Frame *active_frame = frame;
+        while (active_frame != NULL)
         {
             // iterate through all the bindings of this frame
-            Value *current_binding = current_frame->bindings;
+            Value *current_binding = active_frame->bindings;
             while (!isNull(current_binding))
             {
                 if (current_binding->type == CONS_TYPE)
@@ -45,8 +47,8 @@ Value *eval(Value *expr, Frame *frame)
                     texit(1);
                     return makeNull();
                 }
+            active_frame = active_frame->parent;
             }
-            current_frame = current_frame->parent;
         }
         printf("Syntax error: symbol %s not defined\n", expr->s);
         texit(1);
@@ -54,8 +56,10 @@ Value *eval(Value *expr, Frame *frame)
         // return lookUpSymbol(expr, frame);
         break;
     }
+    //should happens when there is a new sub-level (set of parenthesis)
     case CONS_TYPE:
     {
+        printf("check this here\n");
         Value *first = car(expr);
         Value *args = cdr(expr);
 
@@ -66,15 +70,12 @@ Value *eval(Value *expr, Frame *frame)
         }
         else if (strcmp(first->s, "let"))
         {
-            Frame *let_frame;
-            let_frame->parent = frame; 
-            let_frame->bindings = makeNull();
+            Frame *active_frame;
+            active_frame->parent = frame; 
+            active_frame->bindings = makeNull();
 
             Value *current_arg = car(args);
-            if(current_arg->type == CONS_TYPE){
-                printf("this works\n");
-                texit(1);
-            }
+
             // evalLet (assign all the symbols to their values and push onto the Frame stack)
             while (!isNull(current_arg))
             {
@@ -85,12 +86,10 @@ Value *eval(Value *expr, Frame *frame)
                     if (car(current_arg)->type == SYMBOL_TYPE)
                     {
                         // binding i in list of bindings
-                        Value *binding = car(current_arg);
+                        Value *symbol = car(current_arg);
+                        Value *value = cdr(current_arg);
 
-                        Value *symbol = car(binding);
-                        Value *value = cdr(binding);
-
-                        if (!isNull(cdr(cdr(current_arg))))
+                        if (!isNull((cdr(value))))
                         {
                             printf("Syntax Error in (let): too many arguments\n");
                             texit(1);
@@ -98,27 +97,28 @@ Value *eval(Value *expr, Frame *frame)
                         // add bindings to the frame
                         else
                         {
-                            let_frame->bindings = cons(cons(symbol, binding), let_frame->bindings);
+                            //apply eval to the value
+                            value = eval(value, active_frame);
+                            active_frame->bindings = cons(cons(symbol, value), active_frame->bindings);
                         }
                     }
-                    // leave nodes
+                    // leaves nodes
                     else
                     {
-                        printf("Syntax Error in (let): incorrect form\n");
+                        printf("Syntax Error in (let) parameter: invalid type for symbol declaration\n");
                         texit(1);
                     }
                     current_arg = cdr(current_arg);
                 }
                 else
                 {
-                    printf("Syntax Error: incorrect number of arguments for function let\n");
+                    printf("Syntax Error in (let) parameter: incorrect format\n");
                     texit(1);
                 }
-                current_arg = cdr(current_arg);
             }
 
             Value *body = cdr(args);
-            return eval(body, let_frame);
+            return eval(body, active_frame);
         }
         // Other special forms go here...
         else
@@ -132,7 +132,7 @@ Value *eval(Value *expr, Frame *frame)
     }
     default:
     {
-        printf("this hits here\n");
+        printf("hits here\n");
         return expr;
     }
     }
