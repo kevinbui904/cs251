@@ -67,10 +67,14 @@ Value *eval(Value *expr, Frame *frame)
         else if (strcmp(first->s, "let"))
         {
             Frame *let_frame;
-            let_frame->parent = frame;
+            let_frame->parent = frame; 
             let_frame->bindings = makeNull();
 
             Value *current_arg = car(args);
+            if(current_arg->type == CONS_TYPE){
+                printf("this works\n");
+                texit(1);
+            }
             // evalLet (assign all the symbols to their values and push onto the Frame stack)
             while (!isNull(current_arg))
             {
@@ -112,7 +116,9 @@ Value *eval(Value *expr, Frame *frame)
                 }
                 current_arg = cdr(current_arg);
             }
-            return eval(cdr(args), let_frame);
+
+            Value *body = cdr(args);
+            return eval(body, let_frame);
         }
         // Other special forms go here...
         else
@@ -126,7 +132,7 @@ Value *eval(Value *expr, Frame *frame)
     }
     default:
     {
-        printf("this hits here");
+        printf("this hits here\n");
         return expr;
     }
     }
@@ -138,47 +144,33 @@ call eval() on EVERY top-level node
 */
 void interpret(Value *tree)
 {
-    Value *current = tree;
-    if (current->type == CONS_TYPE)
-    {
-        printf("hello??\n");
-    }
+    Value *current_top_level = tree;
 
-    if (isNull(car(current)))
-    {
-        printf("no way WATUIZ:fj\n");
-    }
-    while (!isNull(current))
+    while (!isNull(current_top_level))
     {
         // make empty Frame
         Frame *empty_frame;
         empty_frame->bindings = makeNull();
-        if (isNull(car(current)))
-        {
-            printf("no way\n");
-        }
-        else
-        {
-            printf("god is real");
-        }
-        Value *check = eval(car(current), empty_frame);
+        empty_frame->parent = NULL;
 
-        if (check->type == INT_TYPE)
-        {
-            printf("god bless\n");
-        }
-        else if (check->type == CONS_TYPE)
-        {
-            printf("interesting\n");
-        }
-        else if (check->type == NULL_TYPE)
-        {
-            printf("what\n");
-        }
-        else
-        {
-            printf("WELL FUCK\n");
-        }
-        current = cdr(current);
+        Value *eval_result = eval(car(current_top_level), empty_frame);
+
+        // if (eval_result->type == INT_TYPE)
+        // {
+        //     printf("god bless\n");
+        // }
+        // else if (eval_result->type == CONS_TYPE)
+        // {
+        //     printf("interesting\n");
+        // }
+        // else if (eval_result->type == NULL_TYPE)
+        // {
+        //     printf("what\n");
+        // }
+        // else
+        // {
+        //     printf("Something is very wrong")
+        // }
+        current_top_level = cdr(current_top_level);
     }
 }
