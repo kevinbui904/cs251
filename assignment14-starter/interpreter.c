@@ -1,7 +1,7 @@
 /*
 interpreter.c
 Written by Victor Huang and Thien K. M. Bui
-Last editted 02-23-22
+Last editted 02-28-22
 */
 
 #include <string.h>
@@ -27,13 +27,14 @@ Value *eval(Value *expr, Frame *frame)
             {
                 if (current_binding->type == CONS_TYPE)
                 {
+
                     Value *symbol = car(car(current_binding));
+
                     Value *value = cdr(car(current_binding));
 
                     if (strcmp(symbol->s, expr->s) == 0)
                     {
-                        printf("inside symbol: %i,%s, %i, %s\n", value->type, value->s, symbol->type, symbol->s);
-                        // return value;
+                        return value;
                     }
                     printf("count\n");
                     current_binding = cdr(current_binding);
@@ -58,7 +59,6 @@ Value *eval(Value *expr, Frame *frame)
     {
         Value *first = car(expr);
         Value *args = cdr(expr);
-
         // if first is "if"
         if (strcmp(first->s, "if") == 0)
         {
@@ -98,9 +98,9 @@ Value *eval(Value *expr, Frame *frame)
         // strcmp returns 0 if the 2 strings matches
         else if (strcmp(first->s, "let") == 0)
         {
-            Frame *new_frame;
-            new_frame->parent = frame;
-            new_frame->bindings = makeNull();
+            Frame new_frame;
+            new_frame.bindings = makeNull();
+            new_frame.parent = frame;
 
             Value *current_arg = car(args);
 
@@ -115,8 +115,8 @@ Value *eval(Value *expr, Frame *frame)
                     // valid symbol
                     if (symbol->type == SYMBOL_TYPE)
                     {
-                        Value *value = car(cdr(current_binding));
 
+                        Value *value = car(cdr(current_binding));
                         if (!isNull(cdr(cdr(current_binding))))
                         {
                             printf("Syntax Error in (let): too many arguments\n");
@@ -126,13 +126,9 @@ Value *eval(Value *expr, Frame *frame)
                         else
                         {
                             // apply eval to the value
-
                             Value *eval_result = eval(value, frame);
-                            printf("check here: %i, %i, %s\n", eval_result->type, eval_result->i, symbol->s);
 
-                            new_frame->bindings = cons(cons(symbol, eval_result), new_frame->bindings);
-
-                            printf("new_frame: %i, %i\n", car(car(new_frame->bindings))->type, cdr(car(new_frame->bindings))->type);
+                            new_frame.bindings = cons(cons(symbol, eval_result), new_frame.bindings);
                         }
                     }
                     else
@@ -148,9 +144,9 @@ Value *eval(Value *expr, Frame *frame)
                 }
                 current_arg = cdr(current_arg);
             }
-            printf("levels\n");
             Value *body = car(cdr(args));
-            Value *eval_result = eval(body, new_frame);
+            Value *eval_result = eval(body, &new_frame);
+
             return eval_result;
         }
         // Other special forms go here...
@@ -181,11 +177,11 @@ void interpret(Value *tree)
     while (!isNull(tree))
     {
         // make empty Frame
-        Frame *empty_frame;
-        empty_frame->bindings = makeNull();
-        empty_frame->parent = NULL;
+        Frame empty_frame;
+        empty_frame.bindings = makeNull();
+        empty_frame.parent = NULL;
 
-        Value *eval_result = eval(car(tree), empty_frame);
+        Value *eval_result = eval(car(tree), &empty_frame);
         // print out result
         switch (eval_result->type)
         {
