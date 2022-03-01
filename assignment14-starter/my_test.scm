@@ -1,1 +1,3 @@
-(let ((var-1 7) (var-2 4) (var-n 2)) 3)
+(let ((x 3))
+  (let ((x 5) (y x))
+    y))
