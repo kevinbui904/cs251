@@ -47,7 +47,7 @@ Value *eval(Value *expr, Frame *frame)
             }
             active_frame = active_frame->parent;
         }
-        printf("Syntax error: symbol %s not defined\n", expr->s);
+        printf("Evaluation error: symbol '%s' not found.\n", expr->s);
         texit(1);
         return makeNull();
         // return lookUpSymbol(expr, frame);
@@ -64,15 +64,18 @@ Value *eval(Value *expr, Frame *frame)
             Value *check_args_count = cdr(args);
             int consequences_count = 0;
             // check that if is of valid format
-            while(!isNull(check_args_count)){
-                if(consequences_count > 2){
+            while (!isNull(check_args_count))
+            {
+                if (consequences_count > 2)
+                {
                     printf("Syntax error in (if): too many expressions in if block\n");
                     texit(1);
                 }
                 consequences_count = consequences_count + 1;
                 check_args_count = cdr(check_args_count);
             }
-            if(consequences_count < 2){
+            if (consequences_count < 2)
+            {
                 printf("Evaluation error: not enough consequences following an if.\n");
                 texit(1);
             }
@@ -129,6 +132,19 @@ Value *eval(Value *expr, Frame *frame)
                         // add bindings to the frame
                         else
                         {
+                            // check that bindings have not already been declared
+                            Value *current_binding = new_frame.bindings;
+                            while (!isNull(current_binding))
+                            {
+                                Value *already_bounded_symbol = car(car(current_binding));
+                                if (strcmp(already_bounded_symbol->s, symbol->s) == 0)
+                                {
+                                    printf("Evaluation error: duplicate variable in let\n");
+                                    texit(1);
+                                }
+                                current_binding = cdr(current_binding);
+                            }
+
                             // apply eval to the value
                             Value *eval_result = eval(value, frame);
 
@@ -137,17 +153,18 @@ Value *eval(Value *expr, Frame *frame)
                     }
                     else
                     {
-                        if(symbol->type == NULL_TYPE){
+                        if (symbol->type == NULL_TYPE)
+                        {
                             printf("Evaluation error: null binding in let.\n");
                             texit(1);
                         }
-                        printf("Syntax Error in (let) parameter: invalid type for symbol declaration\n");
+                        printf("Evaluation error: bad form in let.\n");
                         texit(1);
                     }
                 }
                 else
                 {
-                    printf("Syntax Error in (let) parameter: incorrect format\n");
+                    printf("Evaluation error: bad form in let.\n");
                     texit(1);
                 }
                 current_arg = cdr(current_arg);
@@ -155,11 +172,13 @@ Value *eval(Value *expr, Frame *frame)
             Value *body = cdr(args);
             Value *eval_result;
 
-            if(body->type==NULL_TYPE){
+            if (body->type == NULL_TYPE)
+            {
                 printf("Evaluation error: no args following the bindings in let.\n");
                 texit(1);
             }
-            while(!isNull(body)){
+            while (!isNull(body))
+            {
                 eval_result = eval(car(body), &new_frame);
                 body = cdr(body);
             }
@@ -171,12 +190,11 @@ Value *eval(Value *expr, Frame *frame)
             printf("first: %s\n", car(first)->s);
             printf("Syntax Error: symbol not recognized\n");
             texit(1);
-            
         }
         return makeNull();
         break;
     }
-    //atomic values
+    // atomic values
     default:
     {
         return expr;
