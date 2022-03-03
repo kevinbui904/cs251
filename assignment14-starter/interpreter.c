@@ -36,7 +36,6 @@ Value *eval(Value *expr, Frame *frame)
                     {
                         return value;
                     }
-                    printf("count\n");
                     current_binding = cdr(current_binding);
                 }
                 else
@@ -62,29 +61,34 @@ Value *eval(Value *expr, Frame *frame)
         // if first is "if"
         if (strcmp(first->s, "if") == 0)
         {
-            Value *check_for_valid = args;
+            Value *check_args_count = cdr(args);
+            int consequences_count = 0;
             // check that if is of valid format
-            for (int i = 0; i < 2; i++)
-            {
-                check_for_valid = cdr(check_for_valid);
+            while(!isNull(check_args_count)){
+                if(consequences_count > 2){
+                    printf("Syntax error in (if): too many expressions in if block\n");
+                    texit(1);
+                }
+                consequences_count = consequences_count + 1;
+                check_args_count = cdr(check_args_count);
+            }
+            if(consequences_count < 2){
+                printf("Evaluation error: not enough consequences following an if.\n");
+                texit(1);
             }
 
-            if (!isNull(check_for_valid))
-            {
-                printf("Syntax error in (if): too many expressions in if block\n");
-            }
-            Value *eval_result = eval(args, frame);
+            Value *eval_result = eval(car(args), frame);
             if (eval_result->type == BOOL_TYPE)
             {
                 // if true
                 if (eval_result->i == 1)
                 {
-                    Value *eval_result = eval(cdr(args), frame);
+                    Value *eval_result = eval(car(cdr(args)), frame);
                     return eval_result;
                 }
                 else if (eval_result->i == 0)
                 {
-                    Value *eval_result = eval(cdr(cdr(args)), frame);
+                    Value *eval_result = eval(car(cdr(cdr(args))), frame);
                     return eval_result;
                 }
             }
@@ -133,6 +137,10 @@ Value *eval(Value *expr, Frame *frame)
                     }
                     else
                     {
+                        if(symbol->type == NULL_TYPE){
+                            printf("Evaluation error: null binding in let.\n");
+                            texit(1);
+                        }
                         printf("Syntax Error in (let) parameter: invalid type for symbol declaration\n");
                         texit(1);
                     }
@@ -144,25 +152,33 @@ Value *eval(Value *expr, Frame *frame)
                 }
                 current_arg = cdr(current_arg);
             }
-            Value *body = car(cdr(args));
-            Value *eval_result = eval(body, &new_frame);
+            Value *body = cdr(args);
+            Value *eval_result;
 
+            if(body->type==NULL_TYPE){
+                printf("Evaluation error: no args following the bindings in let.\n");
+                texit(1);
+            }
+            while(!isNull(body)){
+                eval_result = eval(car(body), &new_frame);
+                body = cdr(body);
+            }
             return eval_result;
         }
         // Other special forms go here...
         else
         {
-            // 'first' is not a recognized special form
-            // evalationError();
-            printf("Symbol not recognized\n");
+            printf("first: %s\n", car(first)->s);
+            printf("Syntax Error: symbol not recognized\n");
             texit(1);
+            
         }
         return makeNull();
         break;
     }
+    //atomic values
     default:
     {
-        // printf("hits here\n");
         return expr;
     }
     }
@@ -193,7 +209,7 @@ void interpret(Value *tree)
 
             break;
         case STR_TYPE:
-            printf("%s\n", eval_result->s);
+            printf("\"%s\"\n", eval_result->s);
 
             break;
         case NULL_TYPE:
@@ -207,15 +223,15 @@ void interpret(Value *tree)
         case BOOL_TYPE:
             if (eval_result->i == 0)
             {
-                printf("#t\n");
+                printf("#f\n");
             }
             else
             {
-                printf("#f\n");
+                printf("#t\n");
             }
             break;
         default:
-            printf("Interpreter error: print type not supported\n");
+            printf("Interpreter error: print type [%i] not supported\n", eval_result->type);
             texit(1);
         }
         tree = cdr(tree);
