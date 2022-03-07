@@ -20,6 +20,7 @@
 #include "look_up_symbol.h"
 #include "eval_quote.h"
 #include "eval_define.h"
+#include "eval_lambda.h"
 
 Value *eval(Value *expr, Frame *frame)
 {
@@ -56,6 +57,11 @@ Value *eval(Value *expr, Frame *frame)
             {
                 Value *value = cdr(args);
                 return eval_define(args, value, frame);
+            }
+            else if (strcmp(first->s, "lambda") == 0)
+            {
+                Value *body = cdr(args);
+                return eval_lambda(args, body, frame);
             }
             // unrecognized forms goes here
             else
@@ -122,6 +128,9 @@ void print_helper(Value *value)
         break;
     case SYMBOL_TYPE:
         printf("%s ", value->s);
+        break;
+    case CLOSURE_TYPE:
+        printf("<#procedure> ");
         break;
     default:
         printf("Interpreter error: print type [%i] not supported\n", value->type);

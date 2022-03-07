@@ -13,6 +13,7 @@ typedef enum
     CLOSE_TYPE,
     BOOL_TYPE,
     SYMBOL_TYPE,
+    CLOSURE_TYPE,
 
     // Types below are only for bonus work (feel free to comment them out)
     OPENBRACKET_TYPE,
@@ -36,6 +37,15 @@ struct Value
             struct Value *car;
             struct Value *cdr;
         } c;
+        struct Closure
+        {
+            // List of parameter names
+            struct Value *paramNames;
+            // Tree for the body of the function
+            struct Value *functionCode;
+            // Active frame when function was defined
+            struct Frame *frame;
+        } cl;
     };
 };
 // Where do you store a boolean in the union? It's up to you, but I recommend
