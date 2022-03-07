@@ -2,8 +2,8 @@
  * @file interpreter.c
  * @author Thien K. M. Bui and Victor Huang
  * @brief
- * @version 0.1
- * @date 2022-03-02
+ * @version 0.2
+ * @date 2022-06-02
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -21,6 +21,7 @@
 #include "eval_quote.h"
 #include "eval_define.h"
 #include "eval_lambda.h"
+#include "apply.h"
 
 Value *eval(Value *expr, Frame *frame)
 {
@@ -38,43 +39,56 @@ Value *eval(Value *expr, Frame *frame)
         Value *first = car(expr);
         Value *args = cdr(expr);
         // if first is "if"
-        if (first->type == SYMBOL_TYPE)
+        // if (first->type == SYMBOL_TYPE)
+        // {
+        if (strcmp(first->s, "if") == 0)
         {
-            if (strcmp(first->s, "if") == 0)
-            {
-                return eval_if(args, frame);
-            }
-            // strcmp returns 0 if the 2 strings matches
-            else if (strcmp(first->s, "let") == 0)
-            {
-                return eval_let(args, frame);
-            }
-            else if (strcmp(first->s, "quote") == 0)
-            {
-                return eval_quote(args);
-            }
-            else if (strcmp(first->s, "define") == 0)
-            {
-                Value *value = cdr(args);
-                return eval_define(args, value, frame);
-            }
-            else if (strcmp(first->s, "lambda") == 0)
-            {
-                Value *body = cdr(args);
-                return eval_lambda(args, body, frame);
-            }
-            // unrecognized forms goes here
-            else
-            {
-                printf("Syntax Error: symbol not recognized\n");
-                texit(1);
-            }
+            return eval_if(args, frame);
         }
+        // strcmp returns 0 if the 2 strings matches
+        else if (strcmp(first->s, "let") == 0)
+        {
+            return eval_let(args, frame);
+        }
+        else if (strcmp(first->s, "quote") == 0)
+        {
+            return eval_quote(args);
+        }
+        else if (strcmp(first->s, "define") == 0)
+        {
+            Value *value = cdr(args);
+            return eval_define(args, value, frame);
+        }
+        else if (strcmp(first->s, "lambda") == 0)
+        {
+            Value *body = cdr(args);
+            return eval_lambda(args, body, frame);
+        }
+        // unrecognized forms goes here
         else
         {
-            printf("Syntax Error: symbol in bad form\n");
-            texit(1);
+            // If it's not a special form, evaluate
+            // 'first', evaluate the args, then
+            // apply 'first' on the args.
+            Value *evaluated_operator = eval(first, frame);
+            Value *evaluated_args = makeNull();
+
+            Value *current_cons = args;
+            while (!isNull(current_cons))
+            {
+                Value *evaled = eval(car(current_cons), frame);
+                evaluated_args = cons(evaled, evaluated_args);
+                current_cons = cdr(current_cons);
+            }
+            evaluated_args = reverse(evaluated_args);
+            return apply(evaluated_operator, evaluated_args);
         }
+        // }
+        // else
+        // {
+        //     printf("Syntax Error: symbol type enum[%i, %i, %s] in bad form\n", first->type, car(first)->type, car(first)->s);
+        //     texit(1);
+        // }
 
         return makeNull();
         break;
@@ -130,7 +144,7 @@ void print_helper(Value *value)
         printf("%s ", value->s);
         break;
     case CLOSURE_TYPE:
-        printf("<#procedure> ");
+        printf("#<procedure> ");
         break;
     default:
         printf("Interpreter error: print type [%i] not supported\n", value->type);

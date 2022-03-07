@@ -20,9 +20,9 @@
 
 Value *eval_let(Value *args, Frame *parent_frame)
 {
-    Frame new_frame;
-    new_frame.bindings = makeNull();
-    new_frame.parent = parent_frame;
+    Frame *new_frame = talloc(sizeof(Frame));
+    new_frame->bindings = makeNull();
+    new_frame->parent = parent_frame;
 
     Value *current_arg = car(args);
 
@@ -48,7 +48,7 @@ Value *eval_let(Value *args, Frame *parent_frame)
                 else
                 {
                     // check that bindings have not already been declared
-                    Value *current_binding = new_frame.bindings;
+                    Value *current_binding = new_frame->bindings;
                     while (!isNull(current_binding))
                     {
                         Value *already_bounded_symbol = car(car(current_binding));
@@ -63,7 +63,7 @@ Value *eval_let(Value *args, Frame *parent_frame)
                     // apply eval to the value
                     Value *eval_result = eval(value, parent_frame);
 
-                    new_frame.bindings = cons(cons(symbol, eval_result), new_frame.bindings);
+                    new_frame->bindings = cons(cons(symbol, eval_result), new_frame->bindings);
                 }
             }
             else
@@ -94,7 +94,7 @@ Value *eval_let(Value *args, Frame *parent_frame)
     }
     while (!isNull(body))
     {
-        eval_result = eval(car(body), &new_frame);
+        eval_result = eval(car(body), new_frame);
         body = cdr(body);
     }
     return eval_result;
