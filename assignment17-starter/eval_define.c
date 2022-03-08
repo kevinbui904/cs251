@@ -61,7 +61,7 @@ Value *eval_define(Value *symbol, Value *value, Frame *active_frame)
         Value *bounded = car(current_binding);
         if (strcmp(car(bounded)->s, symbol_str) == 0)
         {
-            bounded = cons(symbol, value_to_bind);
+            *bounded = *cons(symbol, value_to_bind);
             void_type->p = active_frame->bindings;
             return void_type;
         }
