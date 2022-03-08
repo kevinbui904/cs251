@@ -170,6 +170,14 @@ void print_helper(Value *value)
 void print_cons_helper(Value *value)
 {
     Value *current = value;
+    //Special Print for Dotted Pairs
+    if(cdr(current)->type != CONS_TYPE){
+        printf("(");
+        print_helper(car(current));
+        printf(".");
+        print_helper(cdr(current));
+        printf(")");
+    }
     printf("(");
     while (!isNull(current))
     {
@@ -226,6 +234,10 @@ void interpret(Value *tree)
     // bind_primitive_fn("car", &builtInCar, globalFrame);
     // bind_primitive_fn("cons", &builtInCdr, globalFrame);
     bind_primitive_fn("+", &prim_add, &global_frame);
+    bind_primitive_fn("null?", &prim_null, &global_frame);
+    bind_primitive_fn("car", &prim_car, &global_frame);
+    bind_primitive_fn("cdr", &prim_cdr, &global_frame);
+    bind_primitive_fn("cons", &prim_cons, &global_frame);
 
     while (!isNull(tree))
     {
