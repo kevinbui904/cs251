@@ -10,11 +10,11 @@
         lst
         (append-list (reverse-list (cdr lst)) (cons (car lst) (quote ()))))))
 
-(append-list (reverse-list (quote ())) (cons (car (quote (1))) (quote ())))
+(append-list (reverse-list (cdr (quote (1)))) (cons (car (quote (1))) (quote ())))
 
 
 
 ; (append-list (quote ()) (quote (1)))
-; (reverse-list (quote (1)))
+(reverse-list (quote (1)))
 ; (reverse-list (quote (("computer" "science") "is" "awesome"))))
 

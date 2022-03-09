@@ -35,12 +35,11 @@ Value *apply(Value *function, Value *args)
     Value *params = function->cl.paramNames;
     Value *fn_code = function->cl.functionCode;
     Frame *active_frame = function->cl.frame;
-
-    Value *bindings = active_frame->bindings;
-
     while (!isNull(params))
     {
         int bounded = 0;
+        Value *bindings = active_frame->bindings;
+
         Value *current_param = car(params);
         // search for the param in the active_frame to rebind
 
