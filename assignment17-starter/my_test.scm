@@ -10,7 +10,7 @@
         lst
         (append-list (reverse-list (cdr lst)) (cons (car lst) (quote ()))))))
 
-(append-list (reverse-list (cdr (quote (1)))) (cons (car (quote (1))) (quote ())))
+; (append-list (reverse-list (cdr (quote (1)))) (cons (car (quote (1))) (quote ())))
 
 
 

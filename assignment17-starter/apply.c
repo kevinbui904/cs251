@@ -37,6 +37,7 @@ Value *apply(Value *function, Value *args)
     Frame *active_frame = function->cl.frame;
     while (!isNull(params))
     {
+        printf("param: %s\n", car(params)->s);
         int bounded = 0;
         Value *bindings = active_frame->bindings;
 
@@ -45,6 +46,7 @@ Value *apply(Value *function, Value *args)
 
         while (!isNull(bindings))
         {
+            printf("bindings: %s, %i\n", car(car(bindings))->s, cdr(car(bindings))->type);
             Value *current_binding = car(bindings);
             if (cdr(current_binding)->type == SYMBOL_TYPE)
             {
@@ -69,7 +71,10 @@ Value *apply(Value *function, Value *args)
         args = cdr(args);
         params = cdr(params);
     }
+    printf("------------------------------------\n");
     // printf("fn_code: %i, %i, %s, %s, %s\n", fn_code->type, car(fn_code)->type, car(fn_code)->s, car(cdr(fn_code))->s, car(cdr(cdr(fn_code)))->s);
-    return eval(fn_code, active_frame);
+    Value *eval_result = eval(fn_code, active_frame);
+    printf("eval_result: %i\n", eval_result->type);
+    return eval_result;
     // call eval on function->expr, but the frame is constructed from args
 }
