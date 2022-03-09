@@ -61,10 +61,79 @@ Value *prim_add(Value *args)
     return sum_value;
 }
 
-Value *prim_null(Value *arg);
+Value *prim_null(Value *arg){
+    Value *current = arg;
+    Value *boolean = talloc(sizeof(Value));
+    int count = 0;
+    while(count < 2 && !isNull(current)){
+        current = cdr(current);
+        count = count + 1;
+    }
+    if(count > 1){
+        printf("Syntax Error: prim_null \n");
+        texit(1);
+    }
+    boolean->type = BOOL_TYPE;
+    if(isNull(car(arg))){
+        boolean->i = 1;
+        return boolean;
+    }else{
+        boolean->i = 0;
+        return boolean;
+    }
+}
 
-Value *prim_car(Value *arg);
+Value *prim_car(Value *arg){
+    Value *current = arg;
+    int count = 0;
+    while(count < 2 && !isNull(current)){
+        current = cdr(current);
+        count = count + 1;
+    }
+    if(count > 1){
+        printf("Syntax Error: prim_car \n");
+        texit(1);
+    }
+    if(car(arg)->type != CONS_TYPE){
+        printf("Syntax Error: prim_car bad type \n");
+        texit(1);
+    }
+    return car(car(arg));
+}
 
-Value *prim_cdr(Value *arg);
+Value *prim_cdr(Value *arg){
+    Value *current = arg;
+    int count = 0;
+    while(count < 2 && !isNull(current)){
+        current = cdr(current);
+        count = count + 1;
+    }
+    if(count > 1){
+        printf("Syntax Error: prim_cdr \n");
+        texit(1);
+    }
+    if(car(arg)->type != CONS_TYPE){
+        printf("Syntax Error: prim_cdr bad type \n");
+        texit(1);
+    }
+    return cdr(car(arg));
+}
 
-Value *prim_cons(Value *args);
+Value *prim_cons(Value *args){
+    int count = 0;
+    Value *current = args;
+    while(count < 3 && !isNull(current)){
+        current = cdr(current);
+        count = count + 1;
+    }
+    if(count >= 3){
+        printf("Syntax Error: too many argument in cons\n");
+        texit(1);
+    }
+    else if(count < 2){
+        printf("Syntax Error: too little argument in cons\n");
+        texit(1);
+    }
+    Value *new_cons = cons(car(car(args)), car(cdr(args)));
+    return new_cons;
+}
