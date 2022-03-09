@@ -8,13 +8,23 @@
   (lambda (lst)
     (if (null? lst)
         lst
-        (append-list (reverse-list (cdr lst)) (cons (car lst) (quote ()))))))
+        (append-list (reverse-list (cdr lst)) (cons (quote (3 4)) (quote ()))))))
 
+
+(define test
+  (lambda (lst)
+    (if (null? lst)
+      lst
+      lst
+      )))
+
+(define x ())
+(quote 9)
 ; (append-list (reverse-list (cdr (quote (1)))) (cons (car (quote (1))) (quote ())))
 
-
+; (test (quote (2 3 4 5)))
 
 ; (append-list (quote ()) (quote (1)))
-(reverse-list (quote (1)))
+(reverse-list (quote (9)))
 ; (reverse-list (quote (("computer" "science") "is" "awesome"))))
 
