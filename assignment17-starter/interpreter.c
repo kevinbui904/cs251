@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief
  * @version 0.2
- * @date 2022-06-02
+ * @date 2022-03-08
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -39,9 +39,7 @@ Value *eval(Value *expr, Frame *frame)
     {
         Value *first = car(expr);
         Value *args = cdr(expr);
-        // if first is "if"
-        // if (first->type == SYMBOL_TYPE)
-        // {
+
         if (strcmp(first->s, "if") == 0)
         {
             return eval_if(args, frame);
@@ -94,12 +92,6 @@ Value *eval(Value *expr, Frame *frame)
                 return apply(evaluated_operator, evaluated_args);
             }
         }
-        // }
-        // else
-        // {
-        //     printf("Syntax Error: symbol type enum[%i, %i, %s] in bad form\n", first->type, car(first)->type, car(first)->s);
-        //     texit(1);
-        // }
 
         return makeNull();
         break;
@@ -170,29 +162,32 @@ void print_helper(Value *value)
 void print_cons_helper(Value *value)
 {
     Value *current = value;
-    //Special Print for Dotted Pairs
-    if(cdr(current)->type != CONS_TYPE){
+    // Special Print for Dotted Pairs
+    if (cdr(current)->type != CONS_TYPE && !isNull(cdr(current)))
+    {
         printf("(");
         print_helper(car(current));
         printf(".");
         print_helper(cdr(current));
         printf(")");
     }
-    printf("(");
-    while (!isNull(current))
+    else
     {
-        if (car(current)->type == CONS_TYPE)
+        printf("(");
+        while (!isNull(current))
         {
-            print_cons_helper(car(current));
+            if (car(current)->type == CONS_TYPE)
+            {
+                print_cons_helper(car(current));
+            }
+            else
+            {
+                print_helper(car(current));
+            }
+            current = cdr(current);
         }
-        else
-        {
-
-            print_helper(car(current));
-        }
-        current = cdr(current);
+        printf(")");
     }
-    printf(")");
 }
 
 /**

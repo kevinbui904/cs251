@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief
  * @version 0.1
- * @date 2022-03-02
+ * @date 2022-03-08
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -35,7 +35,13 @@ Value *look_up_symbol(Value *expr, Frame *frame)
                 Value *value = cdr(car(current_binding));
                 if (strcmp(symbol->s, expr->s) == 0)
                 {
-                    return eval(car(value), frame);
+                    // if x is storing a linked list
+                    if (value->type == CONS_TYPE)
+                    {
+                        return value;
+                    }
+
+                    return eval(value, frame);
                 }
                 current_binding = cdr(current_binding);
             }

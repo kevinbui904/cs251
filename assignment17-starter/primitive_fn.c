@@ -61,79 +61,108 @@ Value *prim_add(Value *args)
     return sum_value;
 }
 
-Value *prim_null(Value *arg){
+Value *prim_null(Value *arg)
+{
+
     Value *current = arg;
     Value *boolean = talloc(sizeof(Value));
     int count = 0;
-    while(count < 2 && !isNull(current)){
+    while (count < 2 && !isNull(current))
+    {
         current = cdr(current);
         count = count + 1;
     }
-    if(count > 1){
+    if (count > 1)
+    {
         printf("Syntax Error: prim_null \n");
         texit(1);
     }
     boolean->type = BOOL_TYPE;
-    if(isNull(car(arg))){
+    if (isNull(car(arg)))
+    {
+        printf("IS NULL: %i\n", car(arg)->type);
         boolean->i = 1;
         return boolean;
-    }else{
+    }
+    else
+    {
+        printf("IS NOT NULL: %i\n", car(arg)->type);
         boolean->i = 0;
         return boolean;
     }
 }
 
-Value *prim_car(Value *arg){
+Value *prim_car(Value *arg)
+{
     Value *current = arg;
     int count = 0;
-    while(count < 2 && !isNull(current)){
+    while (!isNull(current))
+    {
         current = cdr(current);
         count = count + 1;
     }
-    if(count > 1){
-        printf("Syntax Error: prim_car \n");
+    if (count > 1)
+    {
+        printf("Syntax Error: too many arguments in car\n");
         texit(1);
     }
-    if(car(arg)->type != CONS_TYPE){
-        printf("Syntax Error: prim_car bad type \n");
+    if (car(arg)->type != CONS_TYPE)
+    {
+        printf("Syntax Error: bad type in car enum[%i]\n", car(arg)->type);
         texit(1);
     }
     return car(car(arg));
 }
 
-Value *prim_cdr(Value *arg){
+Value *prim_cdr(Value *arg)
+{
     Value *current = arg;
     int count = 0;
-    while(count < 2 && !isNull(current)){
+    while (!isNull(current))
+    {
         current = cdr(current);
         count = count + 1;
     }
-    if(count > 1){
-        printf("Syntax Error: prim_cdr \n");
+    if (count > 1)
+    {
+        printf("Syntax Error: prim_cdr, too many arguments in cdr \n");
         texit(1);
     }
-    if(car(arg)->type != CONS_TYPE){
-        printf("Syntax Error: prim_cdr bad type \n");
+
+    if (car(arg)->type != CONS_TYPE || isNull(car(arg)))
+    {
+        printf("Syntax Error: prim_cdr bad type enum[%i, %i] \n", car(arg)->type, car(arg)->i);
         texit(1);
     }
+
+    printf("check here: %i\n", cdr(car(arg))->type);
     return cdr(car(arg));
 }
 
-Value *prim_cons(Value *args){
+Value *prim_cons(Value *args)
+{
     int count = 0;
     Value *current = args;
-    while(count < 3 && !isNull(current)){
+    while (count < 3 && !isNull(current))
+    {
         current = cdr(current);
         count = count + 1;
     }
-    if(count >= 3){
+    if (count >= 3)
+    {
         printf("Syntax Error: too many argument in cons\n");
         texit(1);
     }
-    else if(count < 2){
+    else if (count < 2)
+    {
         printf("Syntax Error: too little argument in cons\n");
         texit(1);
     }
-    Value *new_cons = cons(car(car(args)), car(cdr(args)));
+
+    Value *lst1 = car(car(args));
+    Value *lst2 = car(cdr(args));
+
+    Value *new_cons = cons(lst1, lst2);
+
     return new_cons;
 }
