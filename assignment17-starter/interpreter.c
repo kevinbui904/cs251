@@ -163,24 +163,10 @@ void print_cons_helper(Value *value)
 {
     Value *current = value;
 
-    // Special Print for Dotted Pairs
-    if (cdr(current)->type != CONS_TYPE && !isNull(cdr(current)))
+    printf("(");
+    while (!isNull(current))
     {
-        printf("(");
-        if(car(current)->type == CONS_TYPE){
-            print_cons_helper(car(current));
-        }else{
-            print_helper(car(current));
-        }
-        
-        printf(" . ");
-        print_helper(cdr(current));
-        printf(")");
-    }
-    else
-    {
-        printf("(");
-        while (!isNull(current))
+        if (cdr(current)->type != CONS_TYPE && !isNull(cdr(current)))
         {
             if (car(current)->type == CONS_TYPE)
             {
@@ -190,10 +176,21 @@ void print_cons_helper(Value *value)
             {
                 print_helper(car(current));
             }
-            current = cdr(current);
+            printf(" . ");
+            print_helper(cdr(current));
+            break;
         }
-        printf(")");
+        if (car(current)->type == CONS_TYPE)
+        {
+            print_cons_helper(car(current));
+        }
+        else
+        {
+            print_helper(car(current));
+        }
+        current = cdr(current);
     }
+    printf(") ");
 }
 
 /**
