@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief primitive Scheme fn definition: add, null, car, cdr, and cons
  * @version 0.1
- * @date 2022-03-07
+ * @date 2022-03-09
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -27,7 +27,7 @@ Value *prim_add(Value *args)
         Value *current_value = car(current_arg);
         if (current_value->type != INT_TYPE && current_value->type != DOUBLE_TYPE)
         {
-            printf("Interpreter Error: type enum[%i] not allowed in + operation\n", current_value->type);
+            printf("Evaluation error: + must take numbers.\n");
             texit(1);
         }
 
@@ -66,27 +66,29 @@ Value *prim_null(Value *arg)
 
     Value *current = arg;
     Value *boolean = talloc(sizeof(Value));
-    int count = 0;
-    while (count < 2 && !isNull(current))
+    int args_count = 0;
+    while (!isNull(current))
     {
         current = cdr(current);
-        count = count + 1;
+        args_count = args_count + 1;
     }
-    if (count > 1)
+    if(args_count < 1){
+        printf("Evaluation error: no arguments supplied to null?\n");
+        texit(1);
+    }
+    else if (args_count > 1)
     {
-        printf("Syntax Error: prim_null \n");
+        printf("Evaluation error: null? takes one argument\n");
         texit(1);
     }
     boolean->type = BOOL_TYPE;
     if (isNull(car(arg)))
     {
-        printf("IS NULL: %i\n", car(arg)->type);
         boolean->i = 1;
         return boolean;
     }
     else
     {
-        printf("IS NOT NULL: %i\n", car(arg)->type);
         boolean->i = 0;
         return boolean;
     }
@@ -103,12 +105,12 @@ Value *prim_car(Value *arg)
     }
     if (count > 1)
     {
-        printf("Syntax Error: too many arguments in car\n");
+        printf("Evaluation error: car takes one argument\n");
         texit(1);
     }
     if (car(arg)->type != CONS_TYPE)
     {
-        printf("Syntax Error: bad type in car enum[%i]\n", car(arg)->type);
+        printf("Evaluation error: car takes a pair.\n");
         texit(1);
     }
     return car(car(arg));
@@ -117,13 +119,19 @@ Value *prim_car(Value *arg)
 Value *prim_cdr(Value *arg)
 {
     Value *current = arg;
-    int count = 0;
+    // display(arg);
+    int args_count = 0;
     while (!isNull(current))
     {
         current = cdr(current);
-        count = count + 1;
+        args_count = args_count + 1;
     }
-    if (count > 1)
+
+    if(args_count < 1){
+        printf("Evaluation error: no arguments supplied to cdr.\n");
+        texit(1);
+    }
+    else if (args_count > 1)
     {
         printf("Syntax Error: prim_cdr, too many arguments in cdr \n");
         texit(1);
@@ -135,31 +143,34 @@ Value *prim_cdr(Value *arg)
         texit(1);
     }
 
-    printf("check here: %i\n", cdr(car(arg))->type);
     return cdr(car(arg));
 }
 
 Value *prim_cons(Value *args)
 {
-    int count = 0;
+    int args_count = 0;
     Value *current = args;
-    while (count < 3 && !isNull(current))
+    while (!isNull(current))
     {
         current = cdr(current);
-        count = count + 1;
+        args_count = args_count + 1;
     }
-    if (count >= 3)
-    {
-        printf("Syntax Error: too many argument in cons\n");
+    if (args_count == 0){
+        printf("Evaluation error: no arguments supplied to cons.\n");
         texit(1);
     }
-    else if (count < 2)
+    else if (args_count >= 3)
     {
-        printf("Syntax Error: too little argument in cons\n");
+        printf("Evaluation error: cons takes two arguments, three or more supplied.\n");
+        texit(1);
+    }
+    else if (args_count < 2)
+    {
+        printf("Evaluation error: cons takes two arguments, only one supplied.\n");
         texit(1);
     }
 
-    Value *lst1 = car(car(args));
+    Value *lst1 = car(args);
     Value *lst2 = car(cdr(args));
 
     Value *new_cons = cons(lst1, lst2);

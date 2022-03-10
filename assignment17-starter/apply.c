@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief make a new stack_frame using args and then return an eval of (function, new_frame);
  * @version 0.1
- * @date 2022-03-06
+ * @date 2022-03-09
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -34,47 +34,22 @@ Value *apply(Value *function, Value *args)
     }
     Value *params = function->cl.paramNames;
     Value *fn_code = function->cl.functionCode;
-    Frame *active_frame = function->cl.frame;
+    // Frame *parent_frame = function->cl.frame;
+
+    Frame *new_frame = talloc(sizeof(Frame));
+    new_frame->parent = function->cl.frame;
+    new_frame->bindings = makeNull();
     while (!isNull(params))
     {
-        printf("param: %s\n", car(params)->s);
         int bounded = 0;
-        Value *bindings = active_frame->bindings;
 
         Value *current_param = car(params);
-        // search for the param in the active_frame to rebind
-
-        while (!isNull(bindings))
-        {
-            printf("bindings: %s, %i\n", car(car(bindings))->s, cdr(car(bindings))->type);
-            Value *current_binding = car(bindings);
-            if (cdr(current_binding)->type == SYMBOL_TYPE)
-            {
-                char *symbol = cdr(current_binding)->s;
-                if (strcmp(current_param->s, symbol) == 0)
-                {
-                    current_binding = cons(current_binding, car(args));
-                    bounded = 1;
-                    break;
-                }
-            }
-
-            bindings = cdr(bindings);
-        }
-        // new binding
-        if (bounded == 0)
-        {
-            Value *new_binding = cons(current_param, car(args));
-            active_frame->bindings = cons(new_binding, active_frame->bindings);
-        }
+        Value *new_binding = cons(current_param, car(args));
+        new_frame->bindings = cons(new_binding, new_frame->bindings);
 
         args = cdr(args);
         params = cdr(params);
     }
-    printf("------------------------------------\n");
-    // printf("fn_code: %i, %i, %s, %s, %s\n", fn_code->type, car(fn_code)->type, car(fn_code)->s, car(cdr(fn_code))->s, car(cdr(cdr(fn_code)))->s);
-    Value *eval_result = eval(fn_code, active_frame);
-    printf("eval_result: %i\n", eval_result->type);
+    Value *eval_result = eval(fn_code, new_frame);
     return eval_result;
-    // call eval on function->expr, but the frame is constructed from args
 }

@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief
  * @version 0.2
- * @date 2022-03-08
+ * @date 2022-03-09
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -162,12 +162,18 @@ void print_helper(Value *value)
 void print_cons_helper(Value *value)
 {
     Value *current = value;
+
     // Special Print for Dotted Pairs
     if (cdr(current)->type != CONS_TYPE && !isNull(cdr(current)))
     {
         printf("(");
-        print_helper(car(current));
-        printf(".");
+        if(car(current)->type == CONS_TYPE){
+            print_cons_helper(car(current));
+        }else{
+            print_helper(car(current));
+        }
+        
+        printf(" . ");
         print_helper(cdr(current));
         printf(")");
     }
