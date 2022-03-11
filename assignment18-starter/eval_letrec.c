@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui
  * @brief eval_letrec expression, to be used in interpreter.c
  * @version 0.1
- * @date 2022-03-10
+ * @date 2022-03-11
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -40,10 +40,11 @@ Value *eval_letrec(Value *args, Value *expr, Frame *parent_frame)
 
     current_arg = car(args);
 
-    Value *bounded = new_frame->bindings;
+    Value *new_bindings = makeNull();
     while (!isNull(current_arg))
     {
         Value *current_binding_pair = car(current_arg);
+        Value *symbol = car(current_binding_pair);
         Value *value = eval(car(cdr(current_binding_pair)), new_frame);
 
         if (value->type == UNSPECIFIED_TYPE)
@@ -53,21 +54,18 @@ Value *eval_letrec(Value *args, Value *expr, Frame *parent_frame)
         }
         else
         {
-            Value *old_unspecified_bind = car(bounded);
-            *old_unspecified_bind = *cons(car(old_unspecified_bind), value);
+            new_bindings = cons(cons(symbol,value), new_bindings);
         }
-        bounded = cdr(bounded);
         current_arg = cdr(current_arg);
     }
+    new_frame->bindings = new_bindings;
 
     Value *body = expr;
     Value *eval_result;
 
     while (!isNull(body))
     {
-        printf("segfaulted here\n");
         eval_result = eval(car(body), new_frame);
-        printf("definitely\n");
         body = cdr(body);
     }
     return eval_result;

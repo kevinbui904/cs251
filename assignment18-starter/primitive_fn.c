@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief primitive Scheme fn definition: add, null, car, cdr, and cons
  * @version 0.1
- * @date 2022-03-10
+ * @date 2022-03-11
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -221,27 +221,49 @@ Value *prim_cons(Value *args)
  */
 Value *prim_subtract(Value *args)
 {
-    double difference = 0.0;
-    int return_double = 0;
+    
     Value *current_arg = args;
+
+    //have to set difference to the first argument in args
+    double difference;
+    
+    if (car(current_arg)->type == DOUBLE_TYPE)
+    {
+        difference = car(current_arg)->d;
+    }
+
+    else if(car(current_arg)->type == INT_TYPE)
+    {
+        difference = car(current_arg)->i;
+    }   
+    else
+    {
+        printf("Evaluation error: + must take numbers.\n");
+        texit(1);
+    }
+
+
+    current_arg = cdr(current_arg);
+    double return_double = 0;
     while (!isNull(current_arg))
+
     {
         Value *current_value = car(current_arg);
-        if (current_value->type != INT_TYPE && current_value->type != DOUBLE_TYPE)
-        {
-            printf("Evaluation error: + must take numbers.\n");
-            texit(1);
-        }
 
-        else if (current_value->type == DOUBLE_TYPE)
+        if (current_value->type == DOUBLE_TYPE)
         {
             return_double = 1;
             difference = difference - current_value->d;
         }
 
-        else
+        else if (current_value->type == INT_TYPE)
         {
             difference = difference - current_value->i;
+        }
+        else 
+        {
+            printf("Evaluation error: + must take numbers.\n");
+            texit(1);
         }
         current_arg = cdr(current_arg);
     }
