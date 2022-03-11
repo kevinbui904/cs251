@@ -15,6 +15,7 @@ typedef enum
     SYMBOL_TYPE,
     CLOSURE_TYPE,
     PRIMITIVE_TYPE,
+    UNSPECIFIED_TYPE,
 
     // Types below are only for bonus work (feel free to comment them out)
     OPENBRACKET_TYPE,

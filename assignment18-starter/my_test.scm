@@ -1,2 +1,5 @@
-(let* ((a 3) (b (+ a 1)) (c (+ b 1)))
-  c)
+(letrec ((sum (lambda (x)
+                (if (= x 0)
+                    0
+                    (+ x (sum (- x 1)))))))
+  (sum 5))

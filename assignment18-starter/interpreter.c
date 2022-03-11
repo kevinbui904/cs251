@@ -24,6 +24,7 @@
 #include "apply.h"
 #include "primitive_fn.h"
 #include "eval_let_star.h"
+#include "eval_letrec.h"
 
 Value *eval(Value *expr, Frame *frame)
 {
@@ -67,6 +68,10 @@ Value *eval(Value *expr, Frame *frame)
         else if (strcmp(first->s, "let*") == 0)
         {
             return eval_let_star(args, body, frame);
+        }
+        else if (strcmp(first->s, "letrec") == 0)
+        {
+            return eval_letrec(args, body, frame);
         }
         // unrecognized forms goes here
         else
@@ -241,6 +246,8 @@ void interpret(Value *tree)
     bind_primitive_fn("car", &prim_car, &global_frame);
     bind_primitive_fn("cdr", &prim_cdr, &global_frame);
     bind_primitive_fn("cons", &prim_cons, &global_frame);
+    bind_primitive_fn("-", &prim_subtract, &global_frame);
+    bind_primitive_fn("=", &prim_equal, &global_frame);
 
     while (!isNull(tree))
     {

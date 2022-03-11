@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief primitive Scheme fn definition: add, null, car, cdr, and cons
  * @version 0.1
- * @date 2022-03-09
+ * @date 2022-03-10
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -17,6 +17,12 @@
 #include "interpreter.h"
 #include "talloc.h"
 
+/**
+ * @brief built in addition, to be used in interpreter.c
+ *
+ * @param args
+ * @return Value*
+ */
 Value *prim_add(Value *args)
 {
     double sum = 0.0;
@@ -61,6 +67,12 @@ Value *prim_add(Value *args)
     return sum_value;
 }
 
+/**
+ * @brief built in null, check whether value is of null type, to be used in interpreter.c
+ *
+ * @param arg
+ * @return Value*
+ */
 Value *prim_null(Value *arg)
 {
 
@@ -72,7 +84,8 @@ Value *prim_null(Value *arg)
         current = cdr(current);
         args_count = args_count + 1;
     }
-    if(args_count < 1){
+    if (args_count < 1)
+    {
         printf("Evaluation error: no arguments supplied to null?\n");
         texit(1);
     }
@@ -94,6 +107,12 @@ Value *prim_null(Value *arg)
     }
 }
 
+/**
+ * @brief primitive car function to be used for list in scheme
+ *
+ * @param arg
+ * @return Value*
+ */
 Value *prim_car(Value *arg)
 {
     Value *current = arg;
@@ -116,6 +135,13 @@ Value *prim_car(Value *arg)
     return car(car(arg));
 }
 
+/**
+ * @brief primitive cdr function to be used for scheme lists
+ *
+ * @param arg
+ * @return Value*
+ */
+
 Value *prim_cdr(Value *arg)
 {
     Value *current = arg;
@@ -127,7 +153,8 @@ Value *prim_cdr(Value *arg)
         args_count = args_count + 1;
     }
 
-    if(args_count < 1){
+    if (args_count < 1)
+    {
         printf("Evaluation error: no arguments supplied to cdr.\n");
         texit(1);
     }
@@ -146,6 +173,13 @@ Value *prim_cdr(Value *arg)
     return cdr(car(arg));
 }
 
+/**
+ * @brief primitive cons function, used to make scheme pairs
+ *
+ * @param args
+ * @return Value*
+ */
+
 Value *prim_cons(Value *args)
 {
     int args_count = 0;
@@ -155,7 +189,8 @@ Value *prim_cons(Value *args)
         current = cdr(current);
         args_count = args_count + 1;
     }
-    if (args_count == 0){
+    if (args_count == 0)
+    {
         printf("Evaluation error: no arguments supplied to cons.\n");
         texit(1);
     }
@@ -176,4 +211,109 @@ Value *prim_cons(Value *args)
     Value *new_cons = cons(lst1, lst2);
 
     return new_cons;
+}
+
+/**
+ * @brief built in subtraction method, to be used in interpreter.c
+ *
+ * @param args
+ * @return Value*
+ */
+Value *prim_subtract(Value *args)
+{
+    double difference = 0.0;
+    int return_double = 0;
+    Value *current_arg = args;
+    while (!isNull(current_arg))
+    {
+        Value *current_value = car(current_arg);
+        if (current_value->type != INT_TYPE && current_value->type != DOUBLE_TYPE)
+        {
+            printf("Evaluation error: + must take numbers.\n");
+            texit(1);
+        }
+
+        else if (current_value->type == DOUBLE_TYPE)
+        {
+            return_double = 1;
+            difference = difference - current_value->d;
+        }
+
+        else
+        {
+            difference = difference - current_value->i;
+        }
+        current_arg = cdr(current_arg);
+    }
+
+    // make return value
+    Value *difference_value = talloc(sizeof(Value));
+    if (return_double == 1)
+    {
+
+        difference_value->type = DOUBLE_TYPE;
+        difference_value->d = difference;
+    }
+    else
+    {
+        difference_value->type = INT_TYPE;
+        difference_value->i = (int)difference;
+    }
+
+    return difference_value;
+}
+
+/**
+ * @brief primitive equal, to be used for integer/float comparison in Scheme
+ *
+ * @param args
+ * @return Value*
+ */
+Value *prim_equal(Value *args)
+{
+
+    double base_for_comparison;
+    if (car(args)->type == INT_TYPE)
+    {
+        base_for_comparison = car(args)->i;
+    }
+    else if (car(args)->type == DOUBLE_TYPE)
+    {
+        base_for_comparison = car(args)->d;
+    }
+    Value *current = args;
+
+    Value *boolean = talloc(sizeof(Value));
+    boolean->type = BOOL_TYPE;
+
+    while (!isNull(current))
+    {
+        if (car(current)->type == DOUBLE_TYPE)
+        {
+            // return false
+            if (base_for_comparison != car(current)->d)
+            {
+                boolean->i = 0;
+                return boolean;
+            }
+        }
+        else if (car(current)->type == INT_TYPE)
+        {
+            // return false
+            if (base_for_comparison != car(current)->i)
+            {
+                boolean->i = 0;
+                return boolean;
+            }
+        }
+        else
+        {
+            printf("Evaluation error: incorrect type enum[%i] found in = operator\n", car(current)->type);
+            texit(1);
+        }
+        current = cdr(current);
+    }
+
+    boolean->i = 1;
+    return boolean;
 }
