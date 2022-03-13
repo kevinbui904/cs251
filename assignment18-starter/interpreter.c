@@ -27,6 +27,7 @@
 #include "eval_and_or.h"
 #include "eval_begin.h"
 #include "eval_set.h"
+#include "eval_cond.h"
 
 #include "primitive_fn.h"
 #include "prim_comparisons.h"
@@ -94,6 +95,10 @@ Value *eval(Value *expr, Frame *frame)
         else if (strcmp(first->s, "set!") == 0)
         {
             return eval_set(args, frame);
+        }
+        else if (strcmp(first->s, "cond") == 0)
+        {
+            return eval_cond(args, frame);
         }
         // unrecognized forms goes here
         else
@@ -276,6 +281,7 @@ void interpret(Value *tree)
     bind_primitive_fn("-", &prim_subtract, &global_frame);
     bind_primitive_fn("=", &prim_equal, &global_frame);
     bind_primitive_fn("<", &prim_less_than, &global_frame);
+    bind_primitive_fn(">", &prim_greater_than, &global_frame);
     bind_primitive_fn(">", &prim_greater_than, &global_frame);
 
     while (!isNull(tree))

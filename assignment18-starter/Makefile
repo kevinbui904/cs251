@@ -10,12 +10,14 @@ else
   SRCS = linkedlist.c talloc.c main.c tokenizer.c parser.c interpreter.c \
          eval_if.c eval_let.c look_up_symbol.c eval_quote.c eval_define.c \
 		 eval_lambda.c apply.c eval_let_star.c eval_letrec.c eval_and_or.c \
-		primitive_fn.c prim_comparisons.c eval_begin.c eval_set.c
+		primitive_fn.c prim_comparisons.c eval_begin.c eval_set.c eval_cond.c \
+		prim_adv_math.c
 
   HDRS = tokenizer.h linkedlist.h talloc.h parser.h value.h interpreter.h \
   		eval_if.h eval_let.h look_up_symbol.h eval_quote.h eval_define.h \
 		  eval_lambda.h apply.h eval_let_star.h eval_letrec.h eval_and_or.h \
-		  primitive_fn.h  prim_comparisons.h eval_begin.h eval_set.h
+		  primitive_fn.h  prim_comparisons.h eval_begin.h eval_set.h eval_cond.h \
+		prim_adv_math.h
 endif
 
 CC = clang
