@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief make a new stack_frame using args and then return an eval of (function, new_frame);
  * @version 0.1
- * @date 2022-03-09
+ * @date 2022-03-13
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -42,37 +42,16 @@ Value *apply(Value *function, Value *args)
     while (!isNull(params))
     {
         Value *current_param = car(params);
-        printf("inside apply: [%s,%i]\n", current_param->s, car(args)->i);
-
-        Value *new_binding = cons(current_param, car(args));
+        Value *copied_value = talloc(sizeof(Value));
+        *copied_value = *car(args);
+        Value *new_binding = cons(current_param, copied_value);
         new_frame->bindings = cons(new_binding, new_frame->bindings);
 
         args = cdr(args);
         params = cdr(params);
     }
 
-    printf("before evaluating inside apply==============================\n");
-    Value *test = new_frame->bindings;
-    while (!isNull(test))
-    {
-        Value *bounded = car(test);
-        printf("bounded pairs: [%s, %i]\n", car(bounded)->s, cdr(bounded)->i);
-        test = cdr(test);
-    }
-
-    Frame *parent = new_frame->parent;
-    Value *test2 = parent->bindings;
-
-    while (!isNull(test2))
-    {
-        Value *bounded = car(test2);
-        printf("bounded parent pairs: [%s, %i]\n", car(bounded)->s, cdr(bounded)->i);
-        test2 = cdr(test2);
-    }
-    printf("===============================\n");
     Value *eval_result = eval(fn_code, new_frame);
-
-    *function->cl.frame = *new_frame;
 
     return eval_result;
 }

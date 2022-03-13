@@ -54,17 +54,12 @@ Value *eval_set(Value *args, Frame *active_frame)
 
             if (strcmp(bounded_var->s, variable->s) == 0)
             {
-                printf("BEFORE SETTING: %i\n", bounded_value->i);
                 *bounded_value = *bind_value;
-                // printf("bounded_value: %i\n", bounded_value->i);
                 void_type->p = NULL;
-                printf("it stops here: %i\n", bounded_value->i);
-
                 return void_type;
             }
             current_binding = cdr(current_binding);
         }
-        printf("traversed up the frame count\n");
         current_frame = current_frame->parent;
     }
 
