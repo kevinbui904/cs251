@@ -85,6 +85,11 @@ Value *prim_less_than(Value *args)
     int args_count = 0;
     while (!isNull(current_arg))
     {
+        if (args_count > 2)
+        {
+            printf("Interpreter error: too many arguments found in <\n");
+            texit(1);
+        }
         args_count = args_count + 1;
         current_arg = cdr(current_arg);
     }
@@ -92,11 +97,6 @@ Value *prim_less_than(Value *args)
     if (args_count < 2)
     {
         printf("Interpreter error: not enough arguments found in <\n");
-        texit(1);
-    }
-    else if (args_count > 2)
-    {
-        printf("Interpreter error: too many arguments found in <\n");
         texit(1);
     }
 
@@ -165,6 +165,12 @@ Value *prim_greater_than(Value *args)
     int args_count = 0;
     while (!isNull(current_arg))
     {
+        if (args_count > 2)
+        {
+            printf("Interpreter error: too many arguments found in <\n");
+            texit(1);
+        }
+
         args_count = args_count + 1;
         current_arg = cdr(current_arg);
     }
@@ -172,11 +178,6 @@ Value *prim_greater_than(Value *args)
     if (args_count < 2)
     {
         printf("Interpreter error: not enough arguments found in <\n");
-        texit(1);
-    }
-    else if (args_count > 2)
-    {
-        printf("Interpreter error: too many arguments found in <\n");
         texit(1);
     }
 

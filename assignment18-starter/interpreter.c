@@ -26,6 +26,7 @@
 #include "eval_letrec.h"
 #include "eval_and_or.h"
 #include "eval_begin.h"
+#include "eval_set.h"
 
 #include "primitive_fn.h"
 #include "prim_comparisons.h"
@@ -89,6 +90,10 @@ Value *eval(Value *expr, Frame *frame)
         else if (strcmp(first->s, "begin") == 0)
         {
             return eval_begin(args, frame);
+        }
+        else if (strcmp(first->s, "set!") == 0)
+        {
+            return eval_set(args, frame);
         }
         // unrecognized forms goes here
         else
