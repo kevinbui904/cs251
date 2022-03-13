@@ -25,6 +25,7 @@
 #include "eval_let_star.h"
 #include "eval_letrec.h"
 #include "eval_and_or.h"
+#include "eval_begin.h"
 
 #include "primitive_fn.h"
 #include "prim_comparisons.h"
@@ -84,6 +85,10 @@ Value *eval(Value *expr, Frame *frame)
         else if (strcmp(first->s, "or") == 0)
         {
             return eval_or(args, frame);
+        }
+        else if (strcmp(first->s, "begin") == 0)
+        {
+            return eval_begin(args, frame);
         }
         // unrecognized forms goes here
         else

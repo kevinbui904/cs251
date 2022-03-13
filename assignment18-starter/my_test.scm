@@ -1,8 +1,5 @@
-(letrec ((is-even? (lambda (n)
-                       (or (= n 0)
-                           (is-odd? (- n 1)))))
-           (is-odd? (lambda (n)
-                      (and (> n 0)
-                           (is-even? (- n 1))))))
-    (is-odd? 12))
-; (and (#t) (#f))
+(let ((x 1))
+(begin
+  3
+  5
+  7))
