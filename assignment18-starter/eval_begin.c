@@ -24,7 +24,16 @@ Value *eval_begin(Value *args, Frame *active_frame)
 
     while (!isNull(current_arg))
     {
+        printf("begin: %s\n", car(car(current_arg))->s);
+
+        Value *test = eval(car(cdr(car(current_arg))), active_frame);
+        printf("args: %i\n", test->i);
+        if (car(current_arg)->type == SYMBOL_TYPE)
+        {
+            printf("symbol: %s\n", car(current_arg)->s);
+        }
         eval_result = eval(car(current_arg), active_frame);
+        printf("==============================\n");
         current_arg = cdr(current_arg);
     }
     return eval_result;

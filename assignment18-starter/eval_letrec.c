@@ -54,7 +54,7 @@ Value *eval_letrec(Value *args, Value *expr, Frame *parent_frame)
         }
         else
         {
-            new_bindings = cons(cons(symbol,value), new_bindings);
+            new_bindings = cons(cons(symbol, value), new_bindings);
         }
         current_arg = cdr(current_arg);
     }

@@ -284,7 +284,6 @@ void interpret(Value *tree)
     bind_primitive_fn("<", &prim_less_than, &global_frame);
     bind_primitive_fn(">", &prim_greater_than, &global_frame);
     bind_primitive_fn("*", &prim_multiply, &global_frame);
-    bind_primitive_fn("*", &prim_multiply, &global_frame);
     bind_primitive_fn("/", &prim_division, &global_frame);
     bind_primitive_fn("modulo", &prim_modulo, &global_frame);
 

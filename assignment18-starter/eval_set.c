@@ -35,7 +35,6 @@ Value *eval_set(Value *args, Frame *active_frame)
     }
 
     Value *variable = car(args);
-    // printf("variable: %s\n", variable->s);
     Value *bind_value = eval(car(cdr(args)), active_frame);
 
     Frame *current_frame = active_frame;
@@ -55,15 +54,17 @@ Value *eval_set(Value *args, Frame *active_frame)
 
             if (strcmp(bounded_var->s, variable->s) == 0)
             {
+                printf("BEFORE SETTING: %i\n", bounded_value->i);
                 *bounded_value = *bind_value;
                 // printf("bounded_value: %i\n", bounded_value->i);
-                void_type->p = current_frame->bindings;
+                void_type->p = NULL;
+                printf("it stops here: %i\n", bounded_value->i);
+
                 return void_type;
             }
-
             current_binding = cdr(current_binding);
         }
-
+        printf("traversed up the frame count\n");
         current_frame = current_frame->parent;
     }
 
