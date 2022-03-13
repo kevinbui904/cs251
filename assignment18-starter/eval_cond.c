@@ -44,9 +44,20 @@ Value *eval_cond(Value *args, Frame *active_frame)
     }
     else
     {
-        printf("Evaluation error: unrecognized symbol in cond\n");
-        texit(1);
-    }
+        Value *current_cond_statement = car(current_arg);
 
-    return makeNull();
+        Value *boolean = eval(car(current_cond_statement), active_frame);
+        if (boolean->i == 1)
+        {
+            return eval(car(cdr(current_cond_statement)), active_frame);
+        }
+        // return VOID_TYPE since there's nothing to do here
+        else
+        {
+            Value *new_void = talloc(sizeof(Value));
+            new_void->type = VOID_TYPE;
+            new_void->p = NULL;
+            return new_void;
+        }
+    }
 }

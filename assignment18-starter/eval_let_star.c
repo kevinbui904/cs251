@@ -3,7 +3,7 @@
  * @author Thien K. M. Bui and Victor Huang
  * @brief
  * @version 0.1
- * @date 2022-03-10
+ * @date 2022-03-12
  *
  * @copyright Copyright (c) 2022 Thien K. M. Bui <buik@carleton.edu>
  *
@@ -26,7 +26,6 @@ Value *eval_let_star(Value *args, Value *expr, Frame *parent_frame)
 
     while (!isNull(current_arg))
     {
-
         Value *current_binding_pair = car(current_arg);
         if (current_binding_pair->type != CONS_TYPE)
         {
@@ -35,7 +34,7 @@ Value *eval_let_star(Value *args, Value *expr, Frame *parent_frame)
         }
 
         Value *symbol = car(current_binding_pair);
-        Value *value = eval(car(cdr(current_binding_pair)), prev_frame);
+        Value *value = eval(car(cdr(current_binding_pair)), prev_frame->parent);
 
         if (!isNull(cdr(cdr(current_binding_pair))))
         {

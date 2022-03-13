@@ -31,6 +31,7 @@
 
 #include "primitive_fn.h"
 #include "prim_comparisons.h"
+#include "prim_adv_math.h"
 
 Value *eval(Value *expr, Frame *frame)
 {
@@ -282,7 +283,10 @@ void interpret(Value *tree)
     bind_primitive_fn("=", &prim_equal, &global_frame);
     bind_primitive_fn("<", &prim_less_than, &global_frame);
     bind_primitive_fn(">", &prim_greater_than, &global_frame);
-    bind_primitive_fn(">", &prim_greater_than, &global_frame);
+    bind_primitive_fn("*", &prim_multiply, &global_frame);
+    bind_primitive_fn("*", &prim_multiply, &global_frame);
+    bind_primitive_fn("/", &prim_division, &global_frame);
+    bind_primitive_fn("modulo", &prim_modulo, &global_frame);
 
     while (!isNull(tree))
     {
@@ -296,7 +300,10 @@ void interpret(Value *tree)
         }
         else if (eval_result->type == VOID_TYPE)
         {
-            global_frame.bindings = eval_result->p;
+            if (eval_result->p != NULL)
+            {
+                global_frame.bindings = eval_result->p;
+            }
         }
         else
         {

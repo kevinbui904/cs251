@@ -27,7 +27,7 @@ Value *eval_set(Value *args, Frame *active_frame)
     {
         if (args_count > 2)
         {
-            printf("Evaluation error: too many arguments in let\n");
+            printf("Evaluation error: too many arguments in set\n");
             texit(1);
         }
         args_count = args_count + 1;
@@ -35,6 +35,7 @@ Value *eval_set(Value *args, Frame *active_frame)
     }
 
     Value *variable = car(args);
+    // printf("variable: %s\n", variable->s);
     Value *bind_value = eval(car(cdr(args)), active_frame);
 
     Frame *current_frame = active_frame;
@@ -55,6 +56,7 @@ Value *eval_set(Value *args, Frame *active_frame)
             if (strcmp(bounded_var->s, variable->s) == 0)
             {
                 *bounded_value = *bind_value;
+                // printf("bounded_value: %i\n", bounded_value->i);
                 void_type->p = current_frame->bindings;
                 return void_type;
             }
