@@ -1,7 +1,8 @@
-(letrec ((sum (lambda (x)
-                (if (= x 0)
-                    0
-                    (+ x (sum (- x 1)))))))
-  (sum 5))
-(- 10 1);
-(= 0.0 0)
+(letrec ((is-even? (lambda (n)
+                       (or (= n 0)
+                           (is-odd? (- n 1)))))
+           (is-odd? (lambda (n)
+                      (and (> n 0)
+                           (is-even? (- n 1))))))
+    (is-odd? 12))
+; (and (#t) (#f))

@@ -22,9 +22,12 @@
 #include "eval_define.h"
 #include "eval_lambda.h"
 #include "apply.h"
-#include "primitive_fn.h"
 #include "eval_let_star.h"
 #include "eval_letrec.h"
+#include "eval_and_or.h"
+
+#include "primitive_fn.h"
+#include "prim_comparisons.h"
 
 Value *eval(Value *expr, Frame *frame)
 {
@@ -43,6 +46,7 @@ Value *eval(Value *expr, Frame *frame)
         Value *args = cdr(expr);
         Value *body = cdr(args);
 
+        // can handle unspecified strings here, strcmp(first->s) is causing segmentation fault when the car(CONS) is not a symbol/string type
         if (strcmp(first->s, "if") == 0)
         {
             return eval_if(args, frame);
@@ -73,6 +77,14 @@ Value *eval(Value *expr, Frame *frame)
         {
             return eval_letrec(args, body, frame);
         }
+        else if (strcmp(first->s, "and") == 0)
+        {
+            return eval_and(args, frame);
+        }
+        else if (strcmp(first->s, "or") == 0)
+        {
+            return eval_or(args, frame);
+        }
         // unrecognized forms goes here
         else
         {
@@ -97,9 +109,14 @@ Value *eval(Value *expr, Frame *frame)
                 struct Value *(*fn_to_call)(struct Value *) = evaluated_operator->pf;
                 return (*fn_to_call)(evaluated_args);
             }
-            else
+            else if (evaluated_operator->type == CLOSURE_TYPE)
             {
                 return apply(evaluated_operator, evaluated_args);
+            }
+            else
+            {
+                printf("Evaluation error: unknown type to apply\n");
+                texit(1);
             }
         }
 
@@ -248,6 +265,8 @@ void interpret(Value *tree)
     bind_primitive_fn("cons", &prim_cons, &global_frame);
     bind_primitive_fn("-", &prim_subtract, &global_frame);
     bind_primitive_fn("=", &prim_equal, &global_frame);
+    bind_primitive_fn("<", &prim_less_than, &global_frame);
+    bind_primitive_fn(">", &prim_greater_than, &global_frame);
 
     while (!isNull(tree))
     {

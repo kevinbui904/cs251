@@ -221,27 +221,26 @@ Value *prim_cons(Value *args)
  */
 Value *prim_subtract(Value *args)
 {
-    
+
     Value *current_arg = args;
 
-    //have to set difference to the first argument in args
+    // have to set difference to the first argument in args
     double difference;
-    
+
     if (car(current_arg)->type == DOUBLE_TYPE)
     {
         difference = car(current_arg)->d;
     }
 
-    else if(car(current_arg)->type == INT_TYPE)
+    else if (car(current_arg)->type == INT_TYPE)
     {
         difference = car(current_arg)->i;
-    }   
+    }
     else
     {
         printf("Evaluation error: + must take numbers.\n");
         texit(1);
     }
-
 
     current_arg = cdr(current_arg);
     double return_double = 0;
@@ -260,7 +259,7 @@ Value *prim_subtract(Value *args)
         {
             difference = difference - current_value->i;
         }
-        else 
+        else
         {
             printf("Evaluation error: + must take numbers.\n");
             texit(1);
@@ -283,59 +282,4 @@ Value *prim_subtract(Value *args)
     }
 
     return difference_value;
-}
-
-/**
- * @brief primitive equal, to be used for integer/float comparison in Scheme
- *
- * @param args
- * @return Value*
- */
-Value *prim_equal(Value *args)
-{
-
-    double base_for_comparison;
-    if (car(args)->type == INT_TYPE)
-    {
-        base_for_comparison = car(args)->i;
-    }
-    else if (car(args)->type == DOUBLE_TYPE)
-    {
-        base_for_comparison = car(args)->d;
-    }
-    Value *current = args;
-
-    Value *boolean = talloc(sizeof(Value));
-    boolean->type = BOOL_TYPE;
-
-    while (!isNull(current))
-    {
-        if (car(current)->type == DOUBLE_TYPE)
-        {
-            // return false
-            if (base_for_comparison != car(current)->d)
-            {
-                boolean->i = 0;
-                return boolean;
-            }
-        }
-        else if (car(current)->type == INT_TYPE)
-        {
-            // return false
-            if (base_for_comparison != car(current)->i)
-            {
-                boolean->i = 0;
-                return boolean;
-            }
-        }
-        else
-        {
-            printf("Evaluation error: incorrect type enum[%i] found in = operator\n", car(current)->type);
-            texit(1);
-        }
-        current = cdr(current);
-    }
-
-    boolean->i = 1;
-    return boolean;
 }
